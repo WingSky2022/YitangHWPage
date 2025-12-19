@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=0">
+    <title>一堂作业系统 - 精确优化版</title>
+    <link rel="stylesheet" href="https://cdn.yitang.top/iconfont/20220717/iconfont.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+    <link rel="stylesheet" href="./index.css">
+    <style>
+        #app { min-height: 100vh; opacity: 0; transition: opacity 0.3s ease; }
+        #app.loaded { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="max-container">
+            <!-- 头部 -->
+            <header class="assignment-header">
+                <div class="header-main">
+                    <span class="tag-label">《业务公式实现1：建立公式编》</span>
+                    <h1 class="page-title">作业内容</h1>
+                </div>
+            </header>
+
+            <!-- 信息卡片区域 (参考图片1) -->
+            <section class="info-cards-section">
+                <div class="info-cards-container">
+                    <div class="info-sidebar">
+                        <div class="info-tab" data-tab="rules">
+                            <div class="tab-icon rules-bg"><i class="iconfont icon-book"></i></div>
+                            <div class="tab-text">
+                                <div class="tab-title">作业规则</div>
+                                <div class="tab-subtitle">查看详分标准</div>
+                            </div>
+                        </div>
+                        <div class="info-tab" data-tab="history">
+                            <div class="tab-icon history-bg"><i class="iconfont icon-time"></i></div>
+                            <div class="tab-text">
+                                <div class="tab-title">历史作业</div>
+                                <div class="tab-subtitle">已提交1份作业</div>
+                            </div>
+                        </div>
+                        <div class="info-tab active" data-tab="notice">
+                            <div class="tab-icon notice-bg"><i class="iconfont icon-light"></i></div>
+                            <div class="tab-text">
+                                <div class="tab-title">系统提示</div>
+                                <div class="tab-subtitle">当前状态：已锁定</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-content-area" id="info-content">
+                        <!-- 动态内容渲染 -->
+                        <div class="tab-pane" id="pane-rules">
+                            <p>• 完成作业，班主任将根据作业质量打(0-6)学分。</p>
+                            <p>• 你的每一份作业都会记录在"一堂"后台。</p>
+                            <p>• 作业和学分会是未来优秀学员考评的参考，也是线下VIP活动邀请的基础，希望认真对待。</p>
+                        </div>
+                        <div class="tab-pane" id="pane-history">
+                            <p>你已经在 <span class="highlight-date">2025-05-11 01:22</span> 提交了一份作业。共获得了 7 个学分。</p>
+                            <button class="btn-ghost-sm"><i class="iconfont icon-link"></i> 查看提交</button>
+                        </div>
+                        <div class="tab-pane active" id="pane-notice">
+                            <p>提示：【2025-12-19 13:37:42】请您能提供以作业，为了完全针此出现答案。还仅作补此就我有开门新组。来您学习在您是更具关实示。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 题目区域 -->
+            <section class="questions-container">
+                <div class="question-card">
+                    <div class="q-header">
+                        <span class="q-num">1</span>
+                        <h3 class="q-title">第一个作业：学习心得探</h3>
+                    </div>
+                    <p class="q-desc">这可整过了个回一今业务开始是量。一个针部成功认真目标、你可以须这该业务公式来实际日后、我们做为了一个业务公式改编的工作经验。</p>
+                    <div class="editor-wrapper">
+                        <div class="ql-toolbar">
+                            <button class="tb-btn" onclick="document.execCommand('bold')"><b>B</b></button>
+                            <button class="tb-btn" onclick="document.execCommand('italic')"><i>I</i></button>
+                            <div class="tb-sep"></div>
+                            <button class="tb-btn" onclick="document.execCommand('insertUnorderedList')">UL</button>
+                        </div>
+                        <div class="ql-editor" contenteditable="true" placeholder="在此输入您的回答..."></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 课程反馈 (参考图片2) -->
+            <section class="feedback-card">
+                <div class="feedback-header">
+                    <div class="line"></div>
+                    <div class="header-pill">课程反馈</div>
+                    <div class="line"></div>
+                </div>
+
+                <div class="feedback-item">
+                    <div class="f-q">
+                        <h4>1. 课程打分 (NPS)</h4>
+                        <p>如果您有朋友也在创业，你有多大可能愿意把这堂课推荐给他？</p>
+                    </div>
+                    <div class="star-rating" id="nps-stars">
+                        <i class="iconfont icon-star" data-val="1"></i>
+                        <i class="iconfont icon-star" data-val="2"></i>
+                        <i class="iconfont icon-star" data-val="3"></i>
+                        <i class="iconfont icon-star" data-val="4"></i>
+                        <i class="iconfont icon-star" data-val="5"></i>
+                        <i class="iconfont icon-star" data-val="6"></i>
+                        <i class="iconfont icon-star" data-val="7"></i>
+                        <i class="iconfont icon-star" data-val="8"></i>
+                        <i class="iconfont icon-star" data-val="9"></i>
+                        <i class="iconfont icon-star" data-val="10"></i>
+                    </div>
+                    <div class="rating-label">请选择评分</div>
+                </div>
+            </section>
+
+            <!-- 底部提交栏 (参考图片3) -->
+            <footer class="action-footer">
+                <div class="footer-content">
+                    <div class="auto-save-hint">
+                        <i class="iconfont icon-cloud"></i> 内容已于 19:38 分自动保存
+                    </div>
+                    <div class="footer-btns">
+                        <button class="btn-pills btn-storage">
+                            <i class="iconfont icon-save"></i> 暂存
+                        </button>
+                        <button class="btn-pills btn-submit">
+                            <i class="iconfont icon-send"></i> 提交
+                        </button>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="./script.js"></script>
+</body>
+</html>
