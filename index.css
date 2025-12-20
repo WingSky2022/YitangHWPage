@@ -175,8 +175,11 @@ body {
 .tb-btn:hover { background: #e0e0e0; }
 .ql-editor {
     min-height: 150px;
-    padding: 15px;
+    padding: 10px 15px;
     outline: none;
+}
+.ql-editor > *:first-child {
+    margin-top: 0;
 }
 .ql-editor:empty:before {
     content: attr(placeholder);

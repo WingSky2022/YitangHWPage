@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Assignment Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#fad200", // Yellow accent
+                        "primary-hover": "#e6c200",
+                        "background-light": "#f8f8f8",
+                        "background-dark": "#121212",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e1e1e",
+                        "text-main-light": "#1f2937",
+                        "text-main-dark": "#f3f4f6",
+                        "text-muted-light": "#6b7280",
+                        "text-muted-dark": "#9ca3af",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#333333",
+                        "alert-red": "#ef4444",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "system-ui", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "1rem",
+                        '2xl': "1.5rem",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+        .editor-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .editor-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .editor-content::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark .editor-content::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
+        .focus-ring:focus-within {
+            box-shadow: 0 0 0 2px rgba(250, 210, 0, 0.5);
+            border-color: #fad200;
+        }
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }.star-rating-container {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            gap: 2px;
+        }
+        .star-rating-container input {
+            display: none;
+        }
+        .star-rating-container label {
+            cursor: pointer;
+            width: 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: #d1d5db;transition: color 0.2s;
+        }
+        .dark .star-rating-container label {
+            color: #4b5563;}.star-rating-container label::before {
+            content: 'star';
+            font-family: 'Material Icons Round';
+            font-size: 48px;
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            line-height: 48px;
+        }.star-rating-container label:nth-of-type(odd) {
+            width: 24px; 
+            overflow: hidden;
+            z-index: 1;
+            direction: ltr;
+        }
+        .star-rating-container label:nth-of-type(odd)::before {
+             left: -24px;width: 48px;
+        }.star-rating-container label:nth-of-type(even) {
+            width: 24px;
+            overflow: hidden;
+            z-index: 2;
+            direction: ltr;
+        }
+        .star-rating-container label:nth-of-type(even)::before {
+             left: 0;
+             width: 48px;
+        }.star-rating-container input:checked ~ label,
+        .star-rating-container label:hover,
+        .star-rating-container label:hover ~ label {
+            color: #fad200;}.toggle-radio-input {
+            display: none;
+        }
+        .slider-container {
+            position: relative;
+            background-color: #f3f4f6;border-radius: 9999px;
+            padding: 4px;
+            display: flex;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .dark .slider-container {
+            background-color: #27272a;}
+        .slider-bg {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            left: 4px;
+            width: calc(33.33% - 2.66px);
+            background-color: #fad200;border-radius: 9999px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .slider-label {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 2;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #6b7280;transition: color 0.3s;
+            position: relative;
+        }
+        .dark .slider-label {
+            color: #9ca3af;
+        }#option1:checked ~ .slider-labels label[for="option1"],
+        #option2:checked ~ .slider-labels label[for="option2"],
+        #option3:checked ~ .slider-labels label[for="option3"] {
+            color: #111827;font-weight: 600;
+        }#option1:checked ~ .slider-bg {
+            transform: translateX(0%);
+        }
+        #option2:checked ~ .slider-bg {
+            transform: translateX(100%) translateX(2px);
+        }
+        #option3:checked ~ .slider-bg {
+            transform: translateX(200%) translateX(4px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-sans antialiased pb-20 transition-colors duration-300">
+<nav class="sticky top-0 z-50 backdrop-blur-md bg-background-light/80 dark:bg-background-dark/80 border-b border-border-light dark:border-border-dark mb-8">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between h-16 items-center">
+<div class="flex items-center gap-2">
+<span class="material-icons-round text-primary text-2xl">school</span>
+<h1 class="text-lg font-bold tracking-tight truncate">《业务公式实操1：建立公式篇》</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors text-gray-500 dark:text-gray-400" onclick="document.documentElement.classList.toggle('dark')" title="Toggle Dark Mode">
+<span class="material-symbols-outlined text-[20px]">dark_mode</span>
+</button>
+<button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors">
+<span class="material-icons-round text-gray-500 dark:text-gray-400">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+<div class="bg-white dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark shadow-sm flex flex-col sm:flex-row gap-5 items-start">
+<div class="shrink-0">
+<div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-icons-round text-2xl">check_circle_outline</span>
+</div>
+</div>
+<div class="space-y-2">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white">会话已恢复</h3>
+<p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+            我们已恢复您在 <span class="font-bold text-gray-800 dark:text-gray-200">2025-12-19 19:37:42</span> 的进度。别担心，其他标签页已被锁定以防止冲突。您可以安全地在此继续。
+        </p>
+</div>
+</div>
+<form class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden relative">
+<div class="flex justify-center py-8 relative">
+<div class="absolute inset-x-0 top-1/2 h-px bg-border-light dark:border-border-dark transform -translate-y-1/2 z-0 mx-12"></div>
+<div class="relative z-10 bg-primary px-8 py-2 rounded-full shadow-sm text-gray-900 font-bold tracking-wide flex items-center gap-2">
+<span class="material-icons-round text-lg">edit_note</span>
+                    作业内容
+                </div>
+</div>
+<div class="px-6 sm:px-10 pb-12">
+<div class="mb-4">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">1、第一个作业：学习心得题</h3>
+<div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed">
+<p>
+                            这节课讲了面对一个业务提升场景、一个有挑战的业务目标，你可以通过构建业务公式来实现目标。我们也给了一个业务公式构建的工作流建议，并且展开了其中的业务梳理、写出初步公式两个环节，并且给出了十大经典范式。
+                        </p>
+<p class="mt-2 text-gray-500 italic">
+                            你可以说说，这节课的内容引发了你哪些回忆和思考？哪些内容对你比较有触动和收获，可以展开写一写。
+                        </p>
+</div>
+</div>
+<div class="border border-border-light dark:border-border-dark rounded-lg overflow-hidden focus-ring transition-all duration-200 bg-white dark:bg-zinc-900">
+<div class="bg-gray-50 dark:bg-zinc-800 border-b border-border-light dark:border-border-dark px-3 py-2 flex items-center gap-1 flex-wrap">
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Bold" type="button">
+<span class="font-bold text-sm">B</span>
+</button>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Italic" type="button">
+<span class="italic font-serif text-sm">I</span>
+</button>
+<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Heading 1" type="button">
+<span class="font-bold text-xs">H1</span>
+</button>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Heading 2" type="button">
+<span class="font-bold text-xs">H2</span>
+</button>
+<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Bullet List" type="button">
+<span class="material-icons-round text-lg">format_list_bulleted</span>
+</button>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Ordered List" type="button">
+<span class="material-icons-round text-lg">format_list_numbered</span>
+</button>
+<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Insert Image" type="button">
+<span class="material-icons-round text-lg">image</span>
+</button>
+<div class="flex-grow"></div>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Fullscreen" type="button">
+<span class="material-icons-round text-lg">fullscreen</span>
+</button>
+</div>
+<div class="relative">
+<textarea class="w-full p-4 min-h-[300px] bg-transparent border-none resize-y focus:ring-0 text-gray-800 dark:text-gray-200 editor-content" placeholder="在此输入您的学习心得..."></textarea>
+<div class="absolute bottom-2 right-4 text-xs text-gray-400 dark:text-gray-500">
+                            5/20000
+                        </div>
+</div>
+</div>
+</div>
+<div class="h-px bg-border-light dark:border-border-dark mx-10 mb-10"></div>
+<div class="px-6 sm:px-10 pb-12">
+<div class="mb-4">
+<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">2、第二个作业：案例推演题</h3>
+<div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed">
+<p class="mb-2">找一个你想要提升的业务场景，尝试用课上讲的工作流做两个事情：</p>
+<ul class="list-decimal list-inside space-y-1 ml-1">
+<li>你可以尝试梳理你的业务现状，初步构建你的业务公式，同时说说你想要达到的目标，初步判断你可能提升的最大机会点。</li>
+<li>如果可以，在业务公式的基础上，看看自己能激发出发多少假设。</li>
+</ul>
+</div>
+</div>
+<div class="border border-border-light dark:border-border-dark rounded-lg overflow-hidden focus-ring transition-all duration-200 bg-white dark:bg-zinc-900">
+<div class="bg-gray-50 dark:bg-zinc-800 border-b border-border-light dark:border-border-dark px-3 py-2 flex items-center gap-1 flex-wrap">
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button">
+<span class="font-bold text-sm">B</span>
+</button>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button">
+<span class="italic font-serif text-sm">I</span>
+</button>
+<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button">
+<span class="font-bold text-xs">H1</span>
+</button>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button">
+<span class="font-bold text-xs">H2</span>
+</button>
+<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button">
+<span class="material-icons-round text-lg">format_list_bulleted</span>
+</button>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button">
+<span class="material-icons-round text-lg">format_list_numbered</span>
+</button>
+<div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button">
+<span class="material-icons-round text-lg">image</span>
+</button>
+<div class="flex-grow"></div>
+<button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button">
+<span class="material-icons-round text-lg">fullscreen</span>
+</button>
+</div>
+<div class="relative">
+<textarea class="w-full p-4 min-h-[200px] bg-transparent border-none resize-y focus:ring-0 text-gray-800 dark:text-gray-200 editor-content" placeholder="请输入文本内容..."></textarea>
+<div class="absolute bottom-2 right-4 text-xs text-gray-400 dark:text-gray-500">
+                            0/20000
+                        </div>
+</div>
+</div>
+</div>
+<div class="h-px bg-border-light dark:border-border-dark mx-10 mb-10"></div>
+<div class="px-6 sm:px-10 pb-12">
+<div class="flex justify-center mb-10">
+<div class="relative group">
+<div class="absolute inset-y-1/2 -left-12 w-8 h-px bg-primary/40"></div>
+<div class="absolute inset-y-1/2 top-1 -left-12 w-6 h-px bg-primary/20"></div>
+<h2 class="text-xl font-bold px-12 py-2 bg-gradient-to-r from-[#ffe587] to-[#fad200] text-gray-900 rounded-lg shadow-sm transform -skew-x-12 relative z-10">
+<span class="block transform skew-x-12 tracking-widest">课程反馈</span>
+</h2>
+<div class="absolute inset-y-1/2 -right-12 w-8 h-px bg-primary/40"></div>
+<div class="absolute inset-y-1/2 top-1 -right-12 w-6 h-px bg-primary/20"></div>
+</div>
+</div>
+<div class="mb-10">
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">1、课程打分 (5星)</h3>
+<p class="text-gray-500 dark:text-gray-400 text-sm mb-6">如果你有朋友也在创业，你有多大可能愿意把这堂课推荐给他？</p>
+<div class="flex flex-col items-center justify-center">
+<div class="star-rating-container text-gray-300 dark:text-gray-600">
+<input id="star5" name="rating" type="radio" value="5"/>
+<label for="star5" title="5 stars"></label>
+<input id="star4.5" name="rating" type="radio" value="4.5"/>
+<label class="half" for="star4.5" title="4.5 stars"></label>
+<input id="star4" name="rating" type="radio" value="4"/>
+<label for="star4" title="4 stars"></label>
+<input id="star3.5" name="rating" type="radio" value="3.5"/>
+<label class="half" for="star3.5" title="3.5 stars"></label>
+<input id="star3" name="rating" type="radio" value="3"/>
+<label for="star3" title="3 stars"></label>
+<input id="star2.5" name="rating" type="radio" value="2.5"/>
+<label class="half" for="star2.5" title="2.5 stars"></label>
+<input id="star2" name="rating" type="radio" value="2"/>
+<label for="star2" title="2 stars"></label>
+<input id="star1.5" name="rating" type="radio" value="1.5"/>
+<label class="half" for="star1.5" title="1.5 stars"></label>
+<input id="star1" name="rating" type="radio" value="1"/>
+<label for="star1" title="1 star"></label>
+<input id="star0.5" name="rating" type="radio" value="0.5"/>
+<label class="half" for="star0.5" title="0.5 stars"></label>
+</div>
+<div class="flex justify-between w-full max-w-[240px] text-xs text-gray-400 mt-2 px-1">
+<span>极不愿意</span>
+<span>极度愿意</span>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">2、公开意愿</h3>
+<p class="text-gray-500 dark:text-gray-400 text-sm mb-6">是否愿意公开作业内容，在课中供其他学员参考学习？</p>
+<div class="slider-container relative mt-8">
+<input class="toggle-radio-input" id="option1" name="public_willingness" type="radio" value="yes"/>
+<input checked="" class="toggle-radio-input" id="option2" name="public_willingness" type="radio" value="confirm"/>
+<input class="toggle-radio-input" id="option3" name="public_willingness" type="radio" value="no"/>
+<div class="slider-bg"></div>
+<div class="slider-labels flex w-full">
+<label class="slider-label" for="option1">愿意</label>
+<label class="slider-label" for="option2">沟通后确认</label>
+<label class="slider-label" for="option3">不愿意</label>
+</div>
+</div>
+</div>
+</div>
+<div class="sticky bottom-0 bg-white/90 dark:bg-card-dark/95 backdrop-blur-md border-t border-border-light dark:border-border-dark px-6 py-4 flex flex-col items-center gap-3 z-20">
+<div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+<span class="material-icons-round text-sm">cloud_done</span>
+                    内容已于 19:38 分自动保存
+                </div>
+<div class="flex w-full max-w-md gap-4">
+<button class="flex-1 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 font-medium py-2.5 px-6 rounded-full transition-colors duration-200 flex justify-center items-center gap-2" type="button">
+<span class="material-icons-round text-lg">save</span>
+                        暂存
+                    </button>
+<button class="flex-1 bg-primary hover:bg-primary-hover text-gray-900 font-bold py-2.5 px-6 rounded-full shadow-lg shadow-yellow-500/20 transition-all duration-200 transform hover:-translate-y-0.5 flex justify-center items-center gap-2" type="submit">
+<span class="material-icons-round text-lg">send</span>
+                        提交
+                    </button>
+</div>
+</div>
+</form>
+</main>
+</body></html>
