@@ -28,21 +28,30 @@
                 <div class="info-cards-container">
                     <div class="info-sidebar">
                         <div class="info-tab" data-tab="rules">
-                            <div class="tab-icon rules-bg"><i class="iconfont icon-book"></i></div>
+                            <div class="tab-icon rules-bg">
+                                <!-- Book Icon (SVG) -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                            </div>
                             <div class="tab-text">
                                 <div class="tab-title">作业规则</div>
                                 <div class="tab-subtitle">查看详分标准</div>
                             </div>
                         </div>
                         <div class="info-tab" data-tab="history">
-                            <div class="tab-icon history-bg"><i class="iconfont icon-time"></i></div>
+                            <div class="tab-icon history-bg">
+                                <!-- Clock Icon (SVG) -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
                             <div class="tab-text">
                                 <div class="tab-title">历史作业</div>
                                 <div class="tab-subtitle">已提交1份作业</div>
                             </div>
                         </div>
                         <div class="info-tab active" data-tab="notice">
-                            <div class="tab-icon notice-bg"><i class="iconfont icon-light"></i></div>
+                            <div class="tab-icon notice-bg">
+                                <!-- Bulb Icon (SVG) -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2.4 1.5-3.8 0-3.9-3.1-7-7-7s-7 3.1-7 7c0 1.4.5 2.8 1.5 3.8.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                            </div>
                             <div class="tab-text">
                                 <div class="tab-title">系统提示</div>
                                 <div class="tab-subtitle">当前状态：已锁定</div>
@@ -61,7 +70,12 @@
                             <button class="btn-ghost-sm"><i class="iconfont icon-link"></i> 查看提交</button>
                         </div>
                         <div class="tab-pane active" id="pane-notice">
-                            <p>提示：【2025-12-19 13:37:42】请您能提供以作业，为了完全针此出现答案。还仅作补此就我有开门新组。来您学习在您是更具关实示。</p>
+                            <div class="notice-content-wrapper">
+                                <span class="notice-icon">💡</span>
+                                <div class="notice-text">
+                                    您于 <strong>10:00</strong> 继续编辑作业。为避免内容丢失，其他窗口已锁定，请安心在此完成。
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

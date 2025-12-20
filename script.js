@@ -1,196 +1,195 @@
-
-class UIController {
-  constructor() {
-    this.initTabs();
-    this.initStars();
-    this.initSlider();
-    this.initTheme();
-    document.getElementById('app')?.classList.add('loaded');
-  }
-
-  initTabs() {
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Tab Switching Logic
     const tabs = document.querySelectorAll('.info-tab');
+    const contentArea = document.getElementById('info-content');
+
+    // Initialize styling for the default active tab
+    const initialActiveTab = document.querySelector('.info-tab.active');
+    if (initialActiveTab && contentArea) {
+        const target = initialActiveTab.getAttribute('data-tab');
+        contentArea.classList.add(`style-${target}`);
+    }
+
     tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const target = tab.getAttribute('data-tab');
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        
-        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-        const pane = document.getElementById(`pane-${target}`);
-        if (pane) pane.classList.add('active');
-      });
-    });
-  }
+        tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-tab');
+            
+            // Toggle active state on tabs
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Toggle active state on content panes
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            const pane = document.getElementById(`pane-${target}`);
+            if (pane) pane.classList.add('active');
 
-  initStars() {
-    const stars = document.querySelectorAll('#nps-stars i');
-    const label = document.querySelector('.rating-label');
-    stars.forEach(star => {
-      star.addEventListener('click', () => {
-        const valStr = star.getAttribute('data-val');
-        if (!valStr) return;
-        const val = parseInt(valStr);
-        stars.forEach((s, idx) => {
-          if (idx < val) s.classList.add('active');
-          else s.classList.remove('active');
+            // Update content area border/bg style
+            if (contentArea) {
+                // Remove all style-* classes
+                contentArea.classList.forEach(cls => {
+                    if (cls.startsWith('style-')) contentArea.classList.remove(cls);
+                });
+                contentArea.classList.add(`style-${target}`);
+            }
         });
-        if (label) label.textContent = `${val}/10分`;
-      });
     });
-  }
 
-  initSlider() {
-    const track = document.querySelector('.slider-track');
-    const thumb = document.querySelector('.slider-thumb');
-    const options = document.querySelectorAll('.slider-option');
-    options.forEach((opt, idx) => {
-      opt.addEventListener('click', () => {
-        options.forEach(o => o.classList.remove('active'));
-        opt.classList.add('active');
-        if (thumb) {
-          thumb.style.transform = `translateX(${idx * 100}%)`;
+    // 2. NPS Star Rating
+    const stars = document.querySelectorAll('.star-rating .iconfont');
+    const ratingLabel = document.querySelector('.rating-label');
+    
+    stars.forEach(star => {
+        star.addEventListener('mouseenter', () => {
+            const val = parseInt(star.getAttribute('data-val'));
+            highlightStars(val);
+        });
+        
+        star.addEventListener('click', () => {
+            const val = parseInt(star.getAttribute('data-val'));
+            highlightStars(val);
+            if(ratingLabel) ratingLabel.textContent = `已打分：${val} 分`;
+            // Save selection (mock)
+            star.parentElement.setAttribute('data-selected', val);
+        });
+    });
+
+    document.querySelector('.star-rating').addEventListener('mouseleave', () => {
+        const parent = document.querySelector('.star-rating');
+        const selected = parent.getAttribute('data-selected');
+        if (selected) {
+            highlightStars(parseInt(selected));
+        } else {
+            highlightStars(0);
         }
-      });
     });
-  }
 
-  initTheme() {
-    let theme = localStorage.getItem('theme') || 'light';
-    const apply = (t) => {
-      document.documentElement.setAttribute('data-theme', t);
-      localStorage.setItem('theme', t);
-      this.updateThemeIcon(t);
-    };
-
-    const btn = document.createElement('div');
-    btn.className = 'theme-toggle';
-    btn.onclick = () => {
-      theme = theme === 'light' ? 'dark' : 'light';
-      apply(theme);
-    };
-    document.body.appendChild(btn);
-    apply(theme);
-  }
-
-  updateThemeIcon(t) {
-    const btn = document.querySelector('.theme-toggle');
-    if (!btn) return;
-    // 使用 SVG 替代字符图标
-    const sunIcon = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
-    const moonIcon = `<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
-    btn.innerHTML = t === 'light' ? moonIcon : sunIcon;
-  }
-}
-
-/**
- * 核心 Markdown 逻辑 (保持原有功能)
- */
-const handleEditorKeydown = (e) => {
-  const selection = window.getSelection();
-  if (!selection || !selection.focusNode) return;
-
-  const node = selection.focusNode;
-  const caretPos = selection.focusOffset;
-  const content = node.textContent || '';
-  const textBeforeCaret = content.substring(0, caretPos);
-
-  let block = node.nodeType === 3 ? node.parentElement : node;
-  while (block && !['P', 'H1', 'H2', 'H3', 'BLOCKQUOTE', 'DIV', 'LI'].includes(block.nodeName)) {
-    block = block.parentElement;
-  }
-
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    document.execCommand('insertHTML', false, '&nbsp;&nbsp;&nbsp;&nbsp;');
-    return;
-  }
-
-  if (e.key === ' ' || e.key === 'Enter') {
-    const applyBlockFormat = (symbol, command, value) => {
-      if (textBeforeCaret !== symbol) return false;
-      e.preventDefault();
-      const range = document.createRange();
-      range.setStart(node, 0);
-      range.setEnd(node, caretPos);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      document.execCommand('delete');
-      if (command === 'formatBlock') {
-        document.execCommand(command, false, value);
-      } else {
-        document.execCommand(command);
-      }
-      return true;
-    };
-
-    if (textBeforeCaret === '---') {
-      applyBlockFormat('---', 'insertHorizontalRule');
-      return;
+    function highlightStars(count) {
+        stars.forEach(s => {
+            const v = parseInt(s.getAttribute('data-val'));
+            if (v <= count) s.classList.add('active');
+            else s.classList.remove('active');
+        });
     }
 
-    if (e.key === ' ') {
-      if (applyBlockFormat('#', 'formatBlock', 'H1')) return;
-      if (applyBlockFormat('##', 'formatBlock', 'H2')) return;
-      if (applyBlockFormat('*', 'insertUnorderedList')) return;
-      if (applyBlockFormat('1.', 'insertOrderedList')) return;
-      if (applyBlockFormat('>', 'formatBlock', 'BLOCKQUOTE')) return;
+    // 3. Simple Markdown Input (Enhanced with Notion-like behavior)
+    const editor = document.querySelector('.ql-editor');
+    if (editor) {
+        editor.addEventListener('input', (e) => {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            const range = selection.getRangeAt(0);
+            const node = range.startContainer;
+            
+            // We only care if we are in a text node
+            if (node.nodeType !== Node.TEXT_NODE) return;
+
+            const text = node.textContent;
+            // Cursor position in the text node
+            const offset = range.startOffset;
+            
+            // Get text up to the cursor
+            const textBefore = text.slice(0, offset);
+
+            // 1. Block Triggers (Triggered by Space)
+            // Only trigger if the last character typed was a space (implied by input event + text checking)
+            // But 'input' fires after change. If textBefore ends with space, we might have a trigger.
+            
+            if (textBefore.endsWith(' ')) {
+                // H1: "# "
+                if (/^#\s$/.test(textBefore)) {
+                    transformBlock('H1', 2); // Remove 2 chars "# "
+                    return;
+                }
+                // H2: "## "
+                if (/^##\s$/.test(textBefore)) {
+                    transformBlock('H2', 3); // Remove 3 chars "## "
+                    return;
+                }
+                // H3: "### "
+                if (/^###\s$/.test(textBefore)) {
+                    transformBlock('H3', 4); // Remove 4 chars "### "
+                    return;
+                }
+                // Unordered List: "* " or "- "
+                if (/^[\*\-]\s$/.test(textBefore)) {
+                    transformBlock('insertUnorderedList', 2);
+                    return;
+                }
+                // Ordered List: "1. "
+                if (/^1\.\s$/.test(textBefore)) {
+                    transformBlock('insertOrderedList', 3);
+                    return;
+                }
+            }
+
+            // 2. Inline Triggers (Bold/Italic)
+            // Bold: "**text**" -> triggers when last char is '*'
+            // We need to check if we just completed a **...** pattern.
+            // Note: input event fires after char insertion.
+            
+            // Bold
+            const boldMatch = textBefore.match(/\*\*([^*]+)\*\*$/);
+            if (boldMatch) {
+                const matchText = boldMatch[0]; // "**text**"
+                const contentText = boldMatch[1]; // "text"
+                transformInline(matchText.length, `<b>${contentText}</b>`);
+                return;
+            }
+
+            // Italic: "*text*"
+            // Need to be careful not to trigger on first '*' of '**'
+            // Simple heuristic: if it matches *text* and NOT ending in **, and previous char wasn't *
+            const italicMatch = textBefore.match(/(?<!\*)\*([^*]+)\*$/);
+            if (italicMatch) {
+                const matchText = italicMatch[0]; // "*text*"
+                const contentText = italicMatch[1]; // "text"
+                transformInline(matchText.length, `<i>${contentText}</i>`);
+                return;
+            }
+        });
+
+        function transformBlock(command, removeChars) {
+            // Remove the trigger characters (e.g., "# ")
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const node = range.startContainer;
+            
+            // Adjust range to select the trigger characters
+            range.setStart(node, 0);
+            range.setEnd(node, removeChars);
+            range.deleteContents();
+
+            // Execute the command
+            if (command === 'insertUnorderedList' || command === 'insertOrderedList') {
+                document.execCommand(command, false, null);
+            } else {
+                document.execCommand('formatBlock', false, command);
+            }
+        }
+
+        function transformInline(length, html) {
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const node = range.startContainer;
+            const offset = range.startOffset;
+
+            // Select the markdown pattern (e.g., "**text**")
+            range.setStart(node, offset - length);
+            range.setEnd(node, offset);
+            
+            // Replace with HTML
+            // execCommand 'insertHTML' is safest for preserving undo stack and cursor
+            document.execCommand('insertHTML', false, html);
+            
+            // In some browsers, we might need to manually ensure cursor is after the inserted element
+            // But insertHTML usually handles it well.
+        }
     }
-  }
 
-  if (e.key === '*' || e.key === '=') {
-    const inlineRules = [
-      { trigger: '*', regex: /\*\*([^*]+)\*$/, tag: 'strong' }, 
-      { trigger: '*', regex: /(?<!\*)\*([^*]+)$/, tag: 'em' },
-      { trigger: '=', regex: /==([^=]+)=$/, tag: 'mark' }
-    ];
-
-    for (const rule of inlineRules) {
-      if (e.key !== rule.trigger) continue;
-      const match = textBeforeCaret.match(rule.regex);
-      if (match) {
-        e.preventDefault();
-        const fullMatch = match[0];
-        const innerText = match[1];
-        const range = document.createRange();
-        range.setStart(node, caretPos - fullMatch.length);
-        range.setEnd(node, caretPos);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        document.execCommand('delete');
-        const htmlToInsert = `<${rule.tag}>${innerText}</${rule.tag}>&#8203;`;
-        document.execCommand('insertHTML', false, htmlToInsert);
-        return;
-      }
-    }
-  }
-};
-
-const handlePasteMarkdown = (event) => {
-  const text = event.clipboardData?.getData('text/plain');
-  if (!text) return;
-  const isMarkdown = /(#+ |\[.*\]\(.*\)|(\*\*|__)(.*)(\*\*|__)|> |`{3}|==.*==)/.test(text);
-  if (isMarkdown && window.marked) {
-    event.preventDefault();
-    const html = window.marked.parse(text);
-    document.execCommand('insertHTML', false, html);
-  }
-};
-
-const enhanceEditor = (editor) => {
-  if (editor.hasAttribute('data-enhanced')) return;
-  editor.setAttribute('data-enhanced', 'true');
-  editor.addEventListener('paste', handlePasteMarkdown);
-  editor.addEventListener('keydown', handleEditorKeydown);
-};
-
-const init = () => {
-  // CSS is now loaded via <link> in HTML
-  new UIController();
-
-  const scan = () => document.querySelectorAll('.ql-editor').forEach(el => enhanceEditor(el));
-  scan();
-  new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
-};
-
-init();
+    // 4. Reveal App
+    setTimeout(() => {
+        const app = document.getElementById('app');
+        if (app) app.classList.add('loaded');
+    }, 100);
+});
