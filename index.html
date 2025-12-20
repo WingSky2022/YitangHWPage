@@ -1,154 +1,404 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="user-scalable=0">
-    <title>一堂作业系统 - 精确优化版</title>
-    <link rel="stylesheet" href="https://cdn.yitang.top/iconfont/20220717/iconfont.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
-    <link rel="stylesheet" href="./index.css">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Assignment Editor</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#fad200", // Yellow accent
+                        "primary-hover": "#e6c200",
+                        "background-light": "#f8f8f8",
+                        "background-dark": "#121212",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e1e1e",
+                        "text-main-light": "#1f2937",
+                        "text-main-dark": "#f3f4f6",
+                        "text-muted-light": "#6b7280",
+                        "text-muted-dark": "#9ca3af",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#333333",
+                        "alert-red": "#ef4444",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "system-ui", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "1rem",
+                        '2xl': "1.5rem",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                    }
+                },
+            },
+        };
+    </script>
     <style>
-        #app { min-height: 100vh; opacity: 0; transition: opacity 0.3s ease; }
-        #app.loaded { opacity: 1; }
+        .editor-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .editor-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .editor-content::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark .editor-content::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
+        .focus-ring:focus-within {
+            box-shadow: 0 0 0 2px rgba(250, 210, 0, 0.5);
+            border-color: #fad200;
+        }
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        .star-rating-container {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            gap: 0;
+        }
+        .star-rating-container input {
+            display: none;
+        }
+        .star-rating-container label {
+            cursor: pointer;
+            width: 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: #d1d5db;transition: color 0.2s;
+        }
+        .dark .star-rating-container label {
+            color: #4b5563;
+        }
+        .star-rating-container label::before {
+            content: 'star';
+            font-family: 'Material Icons Round';
+            font-size: 48px;
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            line-height: 48px;
+        }
+        .star-rating-container label:nth-of-type(odd) {
+            width: 24px; 
+            overflow: hidden;
+            z-index: 1;
+            direction: ltr;
+        }
+        .star-rating-container label:nth-of-type(odd)::before {
+             left: -24px;width: 48px;
+        }
+        .star-rating-container label:nth-of-type(even) {
+            width: 24px;
+            overflow: hidden;
+            z-index: 2;
+            direction: ltr;
+        }
+        .star-rating-container label:nth-of-type(even)::before {
+             left: 0;
+             width: 48px;
+        }
+        .star-rating-container input:checked ~ label,
+        .star-rating-container label:hover,
+        .star-rating-container label:hover ~ label {
+            color: #fad200;
+        }
+        .toggle-radio-input {
+            display: none;
+        }
+        .slider-container {
+            position: relative;
+            background-color: #f3f4f6;border-radius: 9999px;
+            padding: 4px;
+            display: flex;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .dark .slider-container {
+            background-color: #27272a;
+        }
+        .slider-bg {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            left: 4px;
+            width: calc(33.33% - 2.66px);
+            background-color: #fad200;border-radius: 9999px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .slider-label {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            z-index: 2;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #6b7280;transition: color 0.3s;
+            position: relative;
+        }
+        .dark .slider-label {
+            color: #9ca3af;
+        }
+        #option1:checked ~ .slider-labels label[for="option1"],
+        #option2:checked ~ .slider-labels label[for="option2"],
+        #option3:checked ~ .slider-labels label[for="option3"] {
+            color: #111827;font-weight: 600;
+        }
+        #option1:checked ~ .slider-bg {
+            transform: translateX(0%);
+        }
+        #option2:checked ~ .slider-bg {
+            transform: translateX(100%) translateX(2px);
+        }
+        #option3:checked ~ .slider-bg {
+            transform: translateX(200%) translateX(4px);
+        }
+        
+        /* Markdown Renderer Compatibility Styles */
+        .ql-editor:empty:before {
+            content: attr(placeholder);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+        .ql-editor > *:first-child {
+            margin-top: 0;
+        }
     </style>
 </head>
-<body>
-    <div id="app">
-        <div class="max-container">
-            <!-- 头部 -->
-            <header class="assignment-header">
-                <div class="header-main">
-                    <span class="tag-label">《业务公式实现1：建立公式编》</span>
-                    <h1 class="page-title">作业内容</h1>
-                </div>
-            </header>
-
-            <!-- 信息卡片区域 (参考图片1) -->
-            <section class="info-cards-section">
-                <div class="info-cards-container">
-                    <div class="info-sidebar">
-                        <div class="info-tab" data-tab="rules">
-                            <div class="tab-icon rules-bg">
-                                <!-- Book Icon (SVG) -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                            </div>
-                            <div class="tab-text">
-                                <div class="tab-title">作业规则</div>
-                                <div class="tab-subtitle">查看详分标准</div>
-                            </div>
-                        </div>
-                        <div class="info-tab" data-tab="history">
-                            <div class="tab-icon history-bg">
-                                <!-- Clock Icon (SVG) -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            </div>
-                            <div class="tab-text">
-                                <div class="tab-title">历史作业</div>
-                                <div class="tab-subtitle">已提交1份作业</div>
-                            </div>
-                        </div>
-                        <div class="info-tab active" data-tab="notice">
-                            <div class="tab-icon notice-bg">
-                                <!-- Bulb Icon (SVG) -->
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2.4 1.5-3.8 0-3.9-3.1-7-7-7s-7 3.1-7 7c0 1.4.5 2.8 1.5 3.8.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
-                            </div>
-                            <div class="tab-text">
-                                <div class="tab-title">系统提示</div>
-                                <div class="tab-subtitle">当前状态：已锁定</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="info-content-area" id="info-content">
-                        <!-- 动态内容渲染 -->
-                        <div class="tab-pane" id="pane-rules">
-                            <p>• 完成作业，班主任将根据作业质量打(0-6)学分。</p>
-                            <p>• 你的每一份作业都会记录在"一堂"后台。</p>
-                            <p>• 作业和学分会是未来优秀学员考评的参考，也是线下VIP活动邀请的基础，希望认真对待。</p>
-                        </div>
-                        <div class="tab-pane" id="pane-history">
-                            <p>你已经在 <span class="highlight-date">2025-05-11 01:22</span> 提交了一份作业。共获得了 7 个学分。</p>
-                            <button class="btn-ghost-sm"><i class="iconfont icon-link"></i> 查看提交</button>
-                        </div>
-                        <div class="tab-pane active" id="pane-notice">
-                            <div class="notice-content-wrapper">
-                                <span class="notice-icon">💡</span>
-                                <div class="notice-text">
-                                    您于 <strong>10:00</strong> 继续编辑作业。为避免内容丢失，其他窗口已锁定，请安心在此完成。
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 题目区域 -->
-            <section class="questions-container">
-                <div class="question-card">
-                    <div class="q-header">
-                        <span class="q-num">1</span>
-                        <h3 class="q-title">第一个作业：学习心得探</h3>
-                    </div>
-                    <p class="q-desc">这可整过了个回一今业务开始是量。一个针部成功认真目标、你可以须这该业务公式来实际日后、我们做为了一个业务公式改编的工作经验。</p>
-                    <div class="editor-wrapper">
-                        <div class="ql-toolbar">
-                            <button class="tb-btn" onclick="document.execCommand('bold')"><b>B</b></button>
-                            <button class="tb-btn" onclick="document.execCommand('italic')"><i>I</i></button>
-                            <div class="tb-sep"></div>
-                            <button class="tb-btn" onclick="document.execCommand('insertUnorderedList')">UL</button>
-                        </div>
-                        <div class="ql-editor" contenteditable="true" placeholder="在此输入您的回答..."></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 课程反馈 (参考图片2) -->
-            <section class="feedback-card">
-                <div class="feedback-header">
-                    <div class="line"></div>
-                    <div class="header-pill">课程反馈</div>
-                    <div class="line"></div>
-                </div>
-
-                <div class="feedback-item">
-                    <div class="f-q">
-                        <h4>1. 课程打分 (NPS)</h4>
-                        <p>如果您有朋友也在创业，你有多大可能愿意把这堂课推荐给他？</p>
-                    </div>
-                    <div class="star-rating" id="nps-stars">
-                        <i class="iconfont icon-star" data-val="1"></i>
-                        <i class="iconfont icon-star" data-val="2"></i>
-                        <i class="iconfont icon-star" data-val="3"></i>
-                        <i class="iconfont icon-star" data-val="4"></i>
-                        <i class="iconfont icon-star" data-val="5"></i>
-                        <i class="iconfont icon-star" data-val="6"></i>
-                        <i class="iconfont icon-star" data-val="7"></i>
-                        <i class="iconfont icon-star" data-val="8"></i>
-                        <i class="iconfont icon-star" data-val="9"></i>
-                        <i class="iconfont icon-star" data-val="10"></i>
-                    </div>
-                    <div class="rating-label">请选择评分</div>
-                </div>
-            </section>
-
-            <!-- 底部提交栏 (参考图片3) -->
-            <footer class="action-footer">
-                <div class="footer-content">
-                    <div class="auto-save-hint">
-                        <i class="iconfont icon-cloud"></i> 内容已于 19:38 分自动保存
-                    </div>
-                    <div class="footer-btns">
-                        <button class="btn-pills btn-storage">
-                            <i class="iconfont icon-save"></i> 暂存
-                        </button>
-                        <button class="btn-pills btn-submit">
-                            <i class="iconfont icon-send"></i> 提交
-                        </button>
-                    </div>
-                </div>
-            </footer>
+<body class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-sans antialiased pb-20 transition-colors duration-300">
+<nav class="sticky top-0 z-50 backdrop-blur-md bg-background-light/80 dark:bg-background-dark/80 border-b border-border-light dark:border-border-dark mb-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            <div class="flex items-center gap-2">
+                <span class="material-icons-round text-primary text-2xl">school</span>
+                <h1 class="text-lg font-bold tracking-tight truncate">《业务公式实操1：建立公式篇》</h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors text-gray-500 dark:text-gray-400" onclick="document.documentElement.classList.toggle('dark')" title="Toggle Dark Mode">
+                    <span class="material-symbols-outlined text-[20px]">dark_mode</span>
+                </button>
+                <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors">
+                    <span class="material-icons-round text-gray-500 dark:text-gray-400">more_horiz</span>
+                </button>
+            </div>
         </div>
     </div>
-    <script src="./markdown-renderer.js"></script>
-    <script src="./script.js"></script>
+</nav>
+<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div class="bg-white dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark shadow-sm flex flex-col sm:flex-row gap-5 items-start">
+        <div class="shrink-0">
+            <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                <span class="material-icons-round text-2xl">check_circle_outline</span>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">会话已恢复</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                我们已恢复您在 <span class="font-bold text-gray-800 dark:text-gray-200">2025-12-19 19:37:42</span> 的进度。别担心，其他标签页已被锁定以防止冲突。您可以安全地在此继续。
+            </p>
+        </div>
+    </div>
+    
+    <form class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden relative">
+        <div class="flex justify-center py-8 relative">
+            <div class="absolute inset-x-0 top-1/2 h-px bg-border-light dark:border-border-dark transform -translate-y-1/2 z-0 mx-12"></div>
+            <div class="relative z-10 bg-primary px-8 py-2 rounded-full shadow-sm text-gray-900 font-bold tracking-wide flex items-center gap-2">
+                <span class="material-icons-round text-lg">edit_note</span>
+                作业内容
+            </div>
+        </div>
+        
+        <!-- Question 1 -->
+        <div class="px-6 sm:px-10 pb-12">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">1、第一个作业：学习心得题</h3>
+                <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <p>这节课讲了面对一个业务提升场景、一个有挑战的业务目标，你可以通过构建业务公式来实现目标。我们也给了一个业务公式构建的工作流建议，并且展开了其中的业务梳理、写出初步公式两个环节，并且给出了十大经典范式。</p>
+                    <p class="mt-2 text-gray-500 italic">你可以说说，这节课的内容引发了你哪些回忆和思考？哪些内容对你比较有触动和收获，可以展开写一写。</p>
+                </div>
+            </div>
+            <div class="border border-border-light dark:border-border-dark rounded-lg overflow-hidden focus-ring transition-all duration-200 bg-white dark:bg-zinc-900">
+                <div class="bg-gray-50 dark:bg-zinc-800 border-b border-border-light dark:border-border-dark px-3 py-2 flex items-center gap-1 flex-wrap">
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Bold" type="button" onclick="document.execCommand('bold')">
+                        <span class="font-bold text-sm">B</span>
+                    </button>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Italic" type="button" onclick="document.execCommand('italic')">
+                        <span class="italic font-serif text-sm">I</span>
+                    </button>
+                    <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Heading 1" type="button" onclick="document.execCommand('formatBlock', false, 'H1')">
+                        <span class="font-bold text-xs">H1</span>
+                    </button>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Heading 2" type="button" onclick="document.execCommand('formatBlock', false, 'H2')">
+                        <span class="font-bold text-xs">H2</span>
+                    </button>
+                    <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Bullet List" type="button" onclick="document.execCommand('insertUnorderedList')">
+                        <span class="material-icons-round text-lg">format_list_bulleted</span>
+                    </button>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Ordered List" type="button" onclick="document.execCommand('insertOrderedList')">
+                        <span class="material-icons-round text-lg">format_list_numbered</span>
+                    </button>
+                    <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Insert Image" type="button">
+                        <span class="material-icons-round text-lg">image</span>
+                    </button>
+                    <div class="flex-grow"></div>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" title="Fullscreen" type="button">
+                        <span class="material-icons-round text-lg">fullscreen</span>
+                    </button>
+                </div>
+                <div class="relative">
+                    <div class="w-full p-4 min-h-[300px] bg-transparent border-none focus:outline-none text-gray-800 dark:text-gray-200 editor-content ql-editor" contenteditable="true" placeholder="在此输入您的学习心得..."></div>
+                    <div class="absolute bottom-2 right-4 text-xs text-gray-400 dark:text-gray-500">5/20000</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-px bg-border-light dark:border-border-dark mx-10 mb-10"></div>
+
+        <!-- Question 2 -->
+        <div class="px-6 sm:px-10 pb-12">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">2、第二个作业：案例推演题</h3>
+                <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed">
+                    <p class="mb-2">找一个你想要提升的业务场景，尝试用课上讲的工作流做两个事情：</p>
+                    <ul class="list-decimal list-inside space-y-1 ml-1">
+                        <li>你可以尝试梳理你的业务现状，初步构建你的业务公式，同时说说你想要达到的目标，初步判断你可能提升的最大机会点。</li>
+                        <li>如果可以，在业务公式的基础上，看看自己能激发出发多少假设。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border border-border-light dark:border-border-dark rounded-lg overflow-hidden focus-ring transition-all duration-200 bg-white dark:bg-zinc-900">
+                <div class="bg-gray-50 dark:bg-zinc-800 border-b border-border-light dark:border-border-dark px-3 py-2 flex items-center gap-1 flex-wrap">
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button" onclick="document.execCommand('bold')"><span class="font-bold text-sm">B</span></button>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button" onclick="document.execCommand('italic')"><span class="italic font-serif text-sm">I</span></button>
+                    <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button" onclick="document.execCommand('formatBlock', false, 'H1')"><span class="font-bold text-xs">H1</span></button>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button" onclick="document.execCommand('formatBlock', false, 'H2')"><span class="font-bold text-xs">H2</span></button>
+                    <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button" onclick="document.execCommand('insertUnorderedList')"><span class="material-icons-round text-lg">format_list_bulleted</span></button>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button" onclick="document.execCommand('insertOrderedList')"><span class="material-icons-round text-lg">format_list_numbered</span></button>
+                    <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button"><span class="material-icons-round text-lg">image</span></button>
+                    <div class="flex-grow"></div>
+                    <button class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors" type="button"><span class="material-icons-round text-lg">fullscreen</span></button>
+                </div>
+                <div class="relative">
+                    <div class="w-full p-4 min-h-[200px] bg-transparent border-none focus:outline-none text-gray-800 dark:text-gray-200 editor-content ql-editor" contenteditable="true" placeholder="请输入文本内容..."></div>
+                    <div class="absolute bottom-2 right-4 text-xs text-gray-400 dark:text-gray-500">0/20000</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-px bg-border-light dark:border-border-dark mx-10 mb-10"></div>
+
+        <!-- Feedback -->
+        <div class="px-6 sm:px-10 pb-12">
+            <div class="flex justify-center mb-10">
+                <div class="relative group">
+                    <div class="absolute inset-y-1/2 -left-12 w-8 h-px bg-primary/40"></div>
+                    <div class="absolute inset-y-1/2 top-1 -left-12 w-6 h-px bg-primary/20"></div>
+                    <h2 class="text-xl font-bold px-12 py-2 bg-gradient-to-r from-[#ffe587] to-[#fad200] text-gray-900 rounded-lg shadow-sm transform -skew-x-12 relative z-10">
+                        <span class="block transform skew-x-12 tracking-widest">课程反馈</span>
+                    </h2>
+                    <div class="absolute inset-y-1/2 -right-12 w-8 h-px bg-primary/40"></div>
+                    <div class="absolute inset-y-1/2 top-1 -right-12 w-6 h-px bg-primary/20"></div>
+                </div>
+            </div>
+            <div class="mb-10">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">1、课程打分 (5星)</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">如果你有朋友也在创业，你有多大可能愿意把这堂课推荐给他？</p>
+                <div class="flex items-center justify-center gap-4">
+                    <span class="text-xs text-gray-400 dark:text-gray-500">极不愿意</span>
+                    <div class="star-rating-container text-gray-300 dark:text-gray-600">
+                        <input id="star5" name="rating" type="radio" value="5"/>
+                        <label for="star5" title="5 stars"></label>
+                        <input id="star4.5" name="rating" type="radio" value="4.5"/>
+                        <label class="half" for="star4.5" title="4.5 stars"></label>
+                        <input id="star4" name="rating" type="radio" value="4"/>
+                        <label for="star4" title="4 stars"></label>
+                        <input id="star3.5" name="rating" type="radio" value="3.5"/>
+                        <label class="half" for="star3.5" title="3.5 stars"></label>
+                        <input id="star3" name="rating" type="radio" value="3"/>
+                        <label for="star3" title="3 stars"></label>
+                        <input id="star2.5" name="rating" type="radio" value="2.5"/>
+                        <label class="half" for="star2.5" title="2.5 stars"></label>
+                        <input id="star2" name="rating" type="radio" value="2"/>
+                        <label for="star2" title="2 stars"></label>
+                        <input id="star1.5" name="rating" type="radio" value="1.5"/>
+                        <label class="half" for="star1.5" title="1.5 stars"></label>
+                        <input id="star1" name="rating" type="radio" value="1"/>
+                        <label for="star1" title="1 star"></label>
+                        <input id="star0.5" name="rating" type="radio" value="0.5"/>
+                        <label class="half" for="star0.5" title="0.5 stars"></label>
+                    </div>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">极度愿意</span>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">2、公开意愿</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">是否愿意公开作业内容，在课中供其他学员参考学习？</p>
+                <div class="slider-container relative mt-8">
+                    <input class="hidden toggle-radio-input" id="option1" name="public_willingness" type="radio" value="yes"/>
+                    <input checked="" class="hidden toggle-radio-input" id="option2" name="public_willingness" type="radio" value="confirm"/>
+                    <input class="hidden toggle-radio-input" id="option3" name="public_willingness" type="radio" value="no"/>
+                    <div class="slider-bg"></div>
+                    <div class="slider-labels flex w-full">
+                        <label class="slider-label" for="option1">愿意</label>
+                        <label class="slider-label" for="option2">沟通后确认</label>
+                        <label class="slider-label" for="option3">不愿意</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="sticky bottom-0 bg-white/90 dark:bg-card-dark/95 backdrop-blur-md border-t border-border-light dark:border-border-dark px-6 py-4 flex flex-col items-center gap-3 z-20">
+            <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                <span class="material-icons-round text-sm">cloud_done</span>
+                内容已于 19:38 分自动保存
+            </div>
+            <div class="flex w-full max-w-md gap-4">
+                <button class="flex-1 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 font-medium py-2.5 px-6 rounded-full transition-colors duration-200 flex justify-center items-center gap-2" type="button">
+                    <span class="material-icons-round text-lg">save</span>
+                    暂存
+                </button>
+                <button class="flex-1 bg-primary hover:bg-primary-hover text-gray-900 font-bold py-2.5 px-6 rounded-full shadow-lg shadow-yellow-500/20 transition-all duration-200 transform hover:-translate-y-0.5 flex justify-center items-center gap-2" type="submit">
+                    <span class="material-icons-round text-lg">send</span>
+                    提交
+                </button>
+            </div>
+        </div>
+    </form>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="./markdown-renderer.js"></script>
+<script src="./script.js"></script>
 </body>
 </html>
