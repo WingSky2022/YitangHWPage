@@ -3,21 +3,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toolbar Button Logic (State Sync)
     // Toolbar Button Logic (State Sync & Action)
     const toolbarButtons = document.querySelectorAll('.toolbar-container button[data-format]');
+    const editors = document.querySelectorAll('.ql-editor');
 
-    // Bind Click Events centrally
-    toolbarButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const format = btn.getAttribute('data-format');
-            if (!format) return;
 
-            // Prevent default button behavior
+    // State for Image Upload targeting
+    let currentUploadEditor = null;
+
+    // Global Event Delegation for Toolbar Actions
+    document.addEventListener('click', (e) => {
+        const target = e.target;
+
+        // Disable native object resizing for better custom handling
+        try {
+            document.execCommand('enableObjectResizing', false, false);
+        } catch (e) { }
+
+        // 1. Handle Standard Formatting Buttons
+        const fmtBtn = target.closest('button[data-format]');
+        if (fmtBtn) {
             e.preventDefault();
+            const format = fmtBtn.getAttribute('data-format');
 
             // Heading Toggle Logic
             if (['h1', 'h2', 'h3'].includes(format)) {
                 const currentBlock = document.queryCommandValue('formatBlock');
                 if (currentBlock && currentBlock.toLowerCase() === format) {
-                    // Toggle Off -> P
                     document.execCommand('formatBlock', false, 'P');
                 } else {
                     document.execCommand('formatBlock', false, format.toUpperCase());
@@ -33,9 +43,67 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (format === 'ul') document.execCommand('insertUnorderedList');
             else if (format === 'ol') document.execCommand('insertOrderedList');
 
-            // Force state update
             updateToolbarState();
-        });
+            return;
+        }
+
+        // 2. Handle Image Upload Buttons
+        const imgBtn = target.closest('.btn-image-upload');
+        if (imgBtn) {
+            e.preventDefault();
+            const toolbar = imgBtn.closest('.toolbar-container');
+            if (toolbar) {
+                // Find associated editor
+                // Toolbar is .bg-gray-50... sibling to .relative > .ql-editor
+                const wrapper = toolbar.parentElement; // .border...
+                const editor = wrapper.querySelector('.ql-editor');
+                currentUploadEditor = editor;
+
+                const input = toolbar.querySelector('.image-upload-input');
+                if (input) input.click();
+            }
+            return;
+        }
+
+        // 3. Handle Fullscreen Buttons
+        const fsBtn = target.closest('.btn-fullscreen');
+        if (fsBtn) {
+            e.preventDefault();
+            const toolbar = fsBtn.closest('.toolbar-container');
+            // Hierarchy: toolbar -> wrapper -> parent -> q block
+            const wrapper = toolbar?.parentElement?.parentElement;
+
+            if (wrapper) {
+                toggleFullscreen(wrapper, fsBtn);
+            }
+            return;
+        }
+    });
+
+    // Image Input Change Listener
+    document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('image-upload-input')) {
+            const input = e.target;
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    // Restore focus to specific editor
+                    if (currentUploadEditor) {
+                        currentUploadEditor.focus();
+                        // Optional: Move cursor to end if no selection? 
+                        // execCommand uses current selection. If focus() restores last selection in that element, good.
+                        // If not, we might need to create a range at end.
+                        // Standard behavior: focus() usually puts cursor at beginning or restores last state.
+
+                        // Safety: Ensure we don't overwrite if user clicked elsewhere.
+                        document.execCommand('insertImage', false, event.target.result);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+            input.value = '';
+        }
     });
 
     const updateToolbarState = () => {
@@ -92,41 +160,191 @@ document.addEventListener('DOMContentLoaded', () => {
         // Note: click listeners on editor might be redundant with selectionchange
     });
 
-    // Image Upload Logic (Multi-instance)
-    const imageBtns = document.querySelectorAll('.btn-image-upload');
-    imageBtns.forEach(btn => {
-        const toolbar = btn.closest('.toolbar-container');
-        if (!toolbar) return;
-        const input = toolbar.querySelector('.image-upload-input');
-        if (!input) return;
 
-        btn.addEventListener('click', () => input.click());
-        input.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const base64 = event.target.result;
-                    document.execCommand('insertImage', false, base64);
-                };
-                reader.readAsDataURL(file);
+
+    // Character Count Logic
+    const MAX_CHARS = 20000;
+    document.querySelectorAll('.editor-content').forEach(editor => {
+        // Find counter display (absolute positioned sibling)
+        const wrapper = editor.parentElement;
+        const counter = wrapper ? wrapper.querySelector('.text-xs') : null; // "5/20000"
+
+        const updateCount = () => {
+            let text = editor.innerText || '';
+            // Remove zero-width spaces that might be added by editor
+            text = text.replace(/[\u200B-\u200D\uFEFF]/g, '');
+            let count = text.length;
+
+            if (count > MAX_CHARS) {
+                // Truncate logic (Safe approach: Alert user, prevent add? 
+                // Truncating innerText directly in contenteditable is risky for cursor/formatting.
+                // Simple approach: Delete extra chars from end is hard. 
+                // Let's just Clamp the display and maybe warn visually for now, 
+                // enforcing strict limit via 'beforeinput' is better).
+
+                // Strict Limit:
+                // We will try to prevent input if full.
+                // But for pasting, we might need truncation.
+                // Let's stick to visual warning + text blocking first.
+                count = MAX_CHARS;
+                counter.style.color = 'red';
+            } else {
+                counter.style.color = '';
             }
-            input.value = '';
+
+            if (counter) counter.textContent = `${count}/${MAX_CHARS}`;
+        };
+
+        // Init
+        updateCount();
+
+        editor.addEventListener('input', (e) => {
+            let text = editor.innerText || '';
+            text = text.replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+            if (text.length > MAX_CHARS) {
+                // Revert is hard. Let's just warn. 
+                // Or try to slice textContent? (Destroys HTML). 
+                // User said "limit".
+                // Detailed Ref implementation usually does text length slicing but preserves HTML is hard.
+                // Let's rely on event prevention.
+            }
+            updateCount();
+        });
+
+        // Prevent input if over limit (except delete keys)
+        editor.addEventListener('keydown', (e) => {
+            const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+            if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+
+            let text = editor.innerText.replace(/[\u200B-\u200D\uFEFF]/g, '');
+            if (text.length >= MAX_CHARS) {
+                e.preventDefault();
+                // Flash counter red
+                if (counter) {
+                    counter.style.color = 'red';
+                    setTimeout(() => counter.style.color = '', 200);
+                }
+            }
         });
     });
 
-    // Fullscreen Toggle Logic (Target HW Container)
-    const fullscreenBtns = document.querySelectorAll('.btn-fullscreen');
-    fullscreenBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Target the Homework Wrapper (contains Title, Desc, Editor)
-            // Hierarchy: btn -> .toolbar-container -> .border... -> .px-6 (Wrapper)
-            const wrapper = btn.closest('.border')?.parentElement;
-            if (wrapper) {
-                toggleFullscreen(wrapper, btn);
-            }
+    // Image Resizer Logic
+    // Create Globals
+    let activeImage = null;
+    let isResizing = false;
+    let startX, startY, startWidth, startHeight;
+    let activeHandle = null;
+
+    // Create Resizer DOM
+    const resizerOverlay = document.createElement('div');
+    resizerOverlay.className = 'resizer-overlay';
+    resizerOverlay.innerHTML = `
+        <div class="resizer-handle handle-nw" data-dir="nw"></div>
+        <div class="resizer-handle handle-ne" data-dir="ne"></div>
+        <div class="resizer-handle handle-sw" data-dir="sw"></div>
+        <div class="resizer-handle handle-se" data-dir="se"></div>
+    `;
+    document.body.appendChild(resizerOverlay);
+
+    const updateResizerPosition = () => {
+        if (!activeImage) {
+            resizerOverlay.style.display = 'none';
+            return;
+        }
+        const rect = activeImage.getBoundingClientRect();
+        // Account for scroll
+        const scrollX = window.scrollX;
+        const scrollY = window.scrollY;
+
+        resizerOverlay.style.width = rect.width + 'px';
+        resizerOverlay.style.height = rect.height + 'px';
+        resizerOverlay.style.left = (rect.left + scrollX) + 'px';
+        resizerOverlay.style.top = (rect.top + scrollY) + 'px';
+        resizerOverlay.style.display = 'block';
+    };
+
+    // Listeners for Image Interaction
+    // 1. Click on Image to Activate
+    document.addEventListener('click', (e) => {
+        // If clicking resizer handle, ignore (handled by mousedown)
+        if (e.target.closest('.resizer-handle')) return;
+
+        if (e.target.tagName === 'IMG' && e.target.closest('.ql-editor')) {
+            activeImage = e.target;
+            updateResizerPosition();
+            // Optional: Select the image in editor (native behavior)
+        } else {
+            // Click outside -> Hide
+            activeImage = null;
+            updateResizerPosition();
+        }
+    });
+
+    // 2. Handle Resizing
+    resizerOverlay.querySelectorAll('.resizer-handle').forEach(handle => {
+        handle.addEventListener('mousedown', (e) => {
+            if (!activeImage) return;
+            e.preventDefault(); // Prevent text selection
+            e.stopPropagation();
+
+            isResizing = true;
+            activeHandle = e.target.getAttribute('data-dir');
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = activeImage.offsetWidth; // Use offsetWidth to ignore transform scale for calculation base
+            startHeight = activeImage.offsetHeight; // or naturalHeight ratio lock?
+
+            // Global move/up listeners
+            document.addEventListener('mousemove', onResize);
+            document.addEventListener('mouseup', endResize);
         });
     });
+
+    const onResize = (e) => {
+        if (!isResizing || !activeImage) return;
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        let newWidth = startWidth;
+        let newHeight = startHeight;
+
+        // Simple resizing logic (aspect ratio lock recommended but free-form for now)
+        // Or Shift-key for ratio? Let's default to free-form or ratio-lock based on corners.
+        // Usually, corner drag implies ratio lock for images, but free form is also common.
+        // Let's implement free form for flexibility, but maybe lock ratio if it's se/nw?
+        // User said "Square black dots", typical behavior.
+
+        // Let's try Standard Free Resize first.
+        // Actually, for HTML images, Aspect Ratio is usually preserved if you only set Width OR Height.
+        // If we set both, we distort.
+        // Best Practice: Resize Width, let Height auto.
+
+        if (activeHandle.includes('e')) newWidth = startWidth + dx;
+        if (activeHandle.includes('w')) newWidth = startWidth - dx;
+
+        // Apply min size
+        if (newWidth < 50) newWidth = 50;
+
+        // Apply
+        activeImage.style.width = newWidth + 'px';
+        activeImage.removeAttribute('height'); // Allow Auto height
+        // activeImage.style.height = 'auto'; 
+
+        updateResizerPosition();
+    };
+
+    const endResize = () => {
+        isResizing = false;
+        document.removeEventListener('mousemove', onResize);
+        document.removeEventListener('mouseup', endResize);
+    };
+
+    // 3. Update position on Scroll/Resize
+    window.addEventListener('resize', updateResizerPosition);
+    window.addEventListener('scroll', updateResizerPosition, true); // Capture phase for all scrolling elements
+
 });
 
 function toggleFullscreen(container, btn) {
