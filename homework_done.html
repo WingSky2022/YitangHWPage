@@ -167,7 +167,7 @@
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <!-- Module 1: Score Card -->
         <div
-            class="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm p-6 text-center mb-6 relative overflow-hidden">
+            class="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm p-5 sm:p-6 text-center mb-4 sm:mb-6 relative overflow-hidden">
             <div class="flex flex-col items-center justify-center gap-2 mb-4">
                 <h2 class="text-xl font-bold">《业务公式实操1：建立公式篇》</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">提交时间：2026-01-02 12:00</p>
@@ -180,12 +180,12 @@
             </div>
 
             <img src="https://cdn.yitang.top/yitang-fe-static/assets/img/homework/stamp.png" alt="Excellent"
-                class="absolute right-6 top-1/2 transform -translate-y-1/2 w-24 sm:w-32 opacity-90 -rotate-12 pointer-events-none hidden sm:block">
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 w-20 opacity-80 -rotate-12 pointer-events-none sm:w-32 sm:right-6 sm:opacity-90">
         </div>
 
         <!-- Module 2: Homework Content -->
         <div
-            class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden p-6 sm:p-10 mb-6">
+            class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden p-5 sm:p-10 mb-4 sm:mb-6">
 
             <!-- Question 1 -->
             <div class="mb-10">
@@ -232,7 +232,7 @@
 
         <!-- Module 3: Teacher's Comment -->
         <div
-            class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden p-6 sm:p-8 mb-6">
+            class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden p-5 sm:p-8 mb-4 sm:mb-6">
             <div class="comment-box !mt-0">
                 <span class="comment-label">班主任点评：</span>
                 <span>总结得非常到位！尤其是第三个公式关于ROI的拆解，非常有见地。案例推演的方向也找得很准，关于假设1，建议可以先小范围试点，观察佣金提升带来的实际边际收益，防止成本过高。</span>
@@ -241,7 +241,7 @@
 
         <!-- Module 4: Course Satisfaction Card -->
         <div
-            class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden p-6 sm:p-10 text-center mb-6">
+            class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden p-5 sm:p-10 text-center mb-6">
 
             <div class="flex justify-center mb-10">
                 <div class="relative group">
@@ -284,7 +284,7 @@
                 onclick="window.location.href='index.html'">
                 再写一份
             </button>
-            <button
+            <button onclick="generateShareImage()"
                 class="flex-1 max-w-[200px] bg-primary hover:bg-primary-hover text-gray-900 font-bold py-2.5 px-6 rounded-full shadow-lg shadow-yellow-500/20 transition-all duration-200 flex justify-center items-center gap-2">
                 <span class="material-icons-round text-lg">share</span>
                 分享
@@ -292,6 +292,213 @@
         </div>
     </div>
 
+    <!-- Share Modal -->
+    <div id="shareModal" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeShareModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full max-h-[90vh] overflow-hidden flex flex-col pointer-events-auto transform transition-all scale-95 opacity-0"
+                id="shareModalContent">
+                <div class="p-4 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-gray-900">长按保存图片分享</h3>
+                    <button onclick="closeShareModal()" class="text-gray-500 hover:text-gray-700">
+                        <span class="material-icons-round">close</span>
+                    </button>
+                </div>
+                <div class="overflow-y-auto p-4 flex justify-center bg-gray-50" id="shareImageContainer">
+                    <!-- Generated Image will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Container for Image Generation -->
+    <div id="share-source-container" class="absolute top-0 left-0 pointer-events-none opacity-0 z-[-1]"
+        style="width: 375px; background: #fff;">
+        <!-- This content will be populated dynamically -->
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="share-generator.js"></script>
+    <script>
+        function closeShareModal() {
+            const modal = document.getElementById('shareModal');
+            const content = document.getElementById('shareModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('shareImageContainer').innerHTML = ''; // Clear image
+            }, 200);
+        }
+
+        async function generateShareImage() {
+            const generator = new ShareGenerator();
+            await generator.generate();
+        }
+        /*
+        async function generateShareImage_old() {
+            const container = document.getElementById('share-source-container');
+            const questions = document.querySelectorAll('.bg-card-light .mb-10'); // Select question blocks
+
+            // 1. Build the Share Content
+            let contentHtml = `
+                <div class="p-6 bg-white flex flex-col items-center">
+                    <!-- User Info Header -->
+                    <div class="flex items-center gap-3 mb-6 w-full">
+                         <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-500">Me</div>
+                         <div class="flex flex-col">
+                            <span class="font-bold text-gray-900">学员：Me</span>
+                            <span class="text-xs text-gray-500">提交于 2026-01-02</span>
+                         </div>
+                         <img src="https://cdn.yitang.top/yitang-fe-static/assets/img/homework/stamp.png" class="w-20 ml-auto opacity-90 -rotate-12">
+                    </div>
+
+                    <!--Title -->
+                    <h1 class="text-xl font-bold text-gray-900 mb-2 w-full text-left">《业务公式实操1：建立公式篇》</h1>
+                    <div class="flex items-baseline gap-1 mb-8 w-full border-b pb-4 border-gray-100">
+                        <span class="text-sm text-gray-500">获得学分</span>
+                        <span class="text-2xl font-black text-primary">6</span>
+                    </div>
+
+                    <!--Homework Content(Cloned)-- >
+            <div class="w-full space-y-6 text-left" id="share-content-body">
+                `;
+
+                // Clone Q1 and Q2 content
+                // Note: In a real app we might clone specific elements. Here we manually reconstruct for better control or just clone the text.
+                // Let's simplified clone of the answer sections
+
+                // Question 1
+                contentHtml += `
+                <div class="mb-4">
+                    <h3 class="font-bold text-gray-900 mb-2">1、第一个作业：请根据自己的业务，写出三个公式。</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-700 leading-relaxed border border-gray-100">
+                        <p class="font-bold mb-1">我的回答：</p>
+                        <p>1. 营收 = 潜在客户数 × 转化率 × LTV</p>
+                        <p>2. 活跃用户 = 新增用户 + 留存用户 - 流失用户</p>
+                        <p>3. 内容ROI = (引流价值 + 品牌价值) / 内容制作成本</p>
+                    </div>
+                </div>
+                `;
+
+                // Question 2
+                contentHtml += `
+                <div class="mb-4">
+                    <h3 class="font-bold text-gray-900 mb-2">2、第二个作业：案例推演题</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-700 leading-relaxed border border-gray-100">
+                        <p class="font-bold mb-1">我的回答：</p>
+                        <p>针对“社区团购”业务场景：</p>
+                        <p>机会点：通过优化“团长”激励机制提高转化率。</p>
+                        <p>假设1：如果提高团长佣金比例5%，GMV能提升10%。</p>
+                        <p>假设2：如果不定期举办团长PK赛，活跃团长数能提升20%。</p>
+                    </div>
+                </div>
+                `;
+
+                // Teacher Comment
+                contentHtml += `
+                <div class="mt-6 p-4 bg-[#fefae5] rounded-lg text-sm text-gray-700 leading-relaxed">
+                    <span class="font-bold text-gray-900">班主任点评：</span>
+                    总结得非常到位！尤其是第三个公式关于ROI的拆解，非常有见地。案例推演的方向也找得很准。
+                </div>
+                `;
+
+                contentHtml += `</div>`; // End body
+
+            // Footer (QR Code)
+            contentHtml += `
+                    < div class="mt-8 pt-8 w-full border-t border-dashed border-gray-200 flex flex-col items-center" >
+                    < !--Scan Text Placeholder(Dynamic visibility)-- >
+                    <div id="share-scan-text" class="hidden mb-4 p-2 bg-white border border-primary text-primary text-xs rounded-full flex items-center gap-1 shadow-sm">
+                        <span class="material-icons-round text-sm">arrow_downward</span>
+                        扫码查看全文
+                    </div>
+
+                    <div class="flex items-center gap-4">
+                        <div id="share-qrcode" class="bg-white p-1"></div>
+                        <div class="flex flex-col text-left">
+                            <span class="text-sm font-bold text-gray-900">长按识别二维码</span>
+                            <span class="text-xs text-gray-400">查看完整作业详情</span>
+                        </div>
+                    </div>
+                     <div class="mt-6 text-xs text-primary/60 font-medium tracking-widest uppercase">—— 右键保存后分享 ——</div>
+                </div >
+                </div >
+            `;
+
+            container.innerHTML = contentHtml;
+
+            // 2. Limit Height Logic
+            const MAX_HEIGHT = 800 * 2; // 2x mobile height approx
+            const contentBody = document.getElementById('share-content-body');
+            const scanText = document.getElementById('share-scan-text');
+
+            // Allow render to calc height
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            if (container.scrollHeight > MAX_HEIGHT) {
+                // If too tall, truncate body
+                // Calculate how much space we have: MAX_HEIGHT - Header - Footer
+                // For simplicity, just set max-height on the body div and overflow hidden
+                contentBody.style.maxHeight = (MAX_HEIGHT - 400) + 'px'; // approx deduction
+                contentBody.style.overflow = 'hidden';
+                contentBody.style.position = 'relative';
+
+                // Add fade mask
+                const mask = document.createElement('div');
+                mask.className = 'absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent';
+                contentBody.appendChild(mask);
+
+                scanText.classList.remove('hidden');
+            }
+
+            // 3. Generate QR Code
+            new QRCode(document.getElementById("share-qrcode"), {
+                text: window.location.href,
+                width: 80,
+                height: 80,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // 4. Generate Image
+            try {
+                // Wait for QR code to render
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const canvas = await html2canvas(container, {
+                    scale: 2, // High res
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+
+                // Show Modal
+                const modal = document.getElementById('shareModal');
+                const content = document.getElementById('shareModalContent');
+                const imgContainer = document.getElementById('shareImageContainer');
+
+                const displayImg = document.createElement('img');
+                displayImg.src = imgData;
+                displayImg.className = 'w-full h-auto rounded shadow-sm';
+
+                imgContainer.appendChild(displayImg);
+
+                modal.classList.remove('hidden');
+                // Trigger reflow
+                void modal.offsetWidth;
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+
+            } catch (err) {
+                console.error('Generaton failed', err);
+                alert('生成图片失败，请重试');
+            } */
+        }
+    </script>
 </body>
 
 </html>
