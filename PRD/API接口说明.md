@@ -140,14 +140,42 @@ const API_BASE_URL = "https://api.yitang.top"; // 需替换为实际后端地址
 ### 4. 认证处理
 *   所有 API 请求 Header 中需携带用户认证 Token（如 `Authorization: Bearer <token>`）。
 
-### 5. 交互行为绑定
-需要修改 HTML 中的静态 `onclick` 事件为实际的 JS 逻辑：
+### 5. 交互行为绑定 (Updated)
+已在 `index.html` 中通过内联 Script 实现了以下 API 也就是占位符函数，部署时请根据实际业务逻辑修改 `const API_BASE_URL` 及具体函数实现：
 
-*   **index.html**:
-    *   **保存/提交**: 绑定对应 POST 接口。
-*   **homework_done.html**:
-    *   **分享功能**: 已封装在 `generateShareImage()` 中，无需额外对接，只要页面内容渲染正确，分享图片即会自动生成正确内容。
+*   **`initPage()`**: 页面加载时调用，自动从 URL 获取 `id` 并调用 `GET /api/homework/{id}`。
+*   **`saveDraft()`**: 绑定了顶部的保存按钮，调用 `POST /api/homework/{id}/save`。
+*   **`submitHomework()`**: 绑定了底部的提交按钮，调用 `POST /api/homework/{id}/submit`。
+*   **`loadHistory()`**: 绑定了“历史作业”标签页的点击事件，调用 `GET /api/homework/{id}/history`。
+*   **`uploadImage(file)`**: 预留了图片上传函数，需配合编辑器逻辑调用。
 
-### 6. 图片上传对接
-*   在 `index.html` 中，监听 `.image-upload-input` 的 `change` 事件对接上传接口。
+*   建议在 `script.js` 或拦截逻辑中，将文件上传后获得的 URL 插入到编辑器中。
+*   当前 `script.js` 中的图片上传逻辑仅为本地预览 (`FileReader`)。
+
+### 7. 环境适配：微信 (WeChat Environment)
+
+如果已部署的页面需要在微信内运行，建议在 `index.html` 的 `<head>` 中加入以下代码以禁止微信自动调整字体大小 (iOS/Android Compat)：
+
+```html
+<script>
+    (function () {
+        if (typeof WeixinJSBridge == "object" && typeof WeixinJSBridge.invoke == "function") {
+            handleFontSize();
+        } else {
+            if (document.addEventListener) {
+                document.addEventListener("WeixinJSBridgeReady", handleFontSize, false);
+            }
+        }
+        function handleFontSize() {
+            WeixinJSBridge.invoke('setFontSizeCallback', { 'fontSize': 0 });
+            WeixinJSBridge.on('menu:setfont', function () {
+                WeixinJSBridge.invoke('setFontSizeCallback', { 'fontSize': 0 });
+            });
+        }
+    })();
+</script>
+```
+
+### 8. 移除冗余逻辑
+*   部署时请注意移除 `index.html` 底部为了演示而添加的 `Mock Data` 生成代码（如有），以及上述占位符脚本中的 `setTimeout` 模拟延迟。
 

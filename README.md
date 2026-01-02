@@ -42,21 +42,17 @@
 
 ### 文件用途
 - **`PRD/`**: 包含原始设计文档、API 接口说明及需求规划。
-- **`index.html` (本地预览版)**: 
-  - **用途**: 用于快速开发和 UI 调试，无需构建工具即可直接双击运行。
+- **`PRD/`**: 包含原始设计文档、API 接口说明及需求规划。
+- **`index.html` (核心入口)**:
+  - **用途**: 本地开发与生产部署的核心文件。
   - **技术栈**: 原生 HTML/CSS/JS (Vanilla JS)。
   - **依赖**: 仅依赖 `marked.js` (Markdown 解析) 和 `iconfont` (图标)。
-  - **特点**: 数据为静态 Mock 数据，逻辑已剥离为 `script.js` 和 `index.css`。
-- **`online.html` (生产部署版)**:
-  - **用途**: 实际线上运行的入口文件 (待同步更新)。
-  - **技术栈**: 集成现有业务系统 (Vue.js + 依赖包)。
-  - **依赖**: 
-    - 基础库: `marked.js`, `iconfont`
-    - **生产环境特有依赖**: 微信 JSBridge 适配代码、业务系统核心 Chunks (`vue`, `lodash`, `main.js` 等 CDN 资源)。
-  - **注意**: 
-    - 当前文件引用的 `.tsx` 脚本在浏览器端无法直接运行。
-    - 部署前**必须**将 `index.html` 中的 `script.js` 和 `index.css` 逻辑同步过来，替换掉 `.tsx` 引用。
-- **`offline.html`**: 废弃或临时文件，后续可移除。
+  - **特点**: 逻辑已剥离为 `script.js` 和 `index.css`，数据为静态 Mock 数据。
+- **`homework_done.html`**:
+  - **用途**: 作业提交后的结果展示页与分享功能页。
+  - **依赖**: 依赖 `share-generator.js`, `script.js`。
+- **`_legacy_backup/`**:
+  - **用途**: 存放归档的旧版源代码 (React/Vite 相关) 及旧版部署文件 (`online.html` 等)，仅作备份。
 
 ## 4. 开发说明
 核心逻辑位于 `script.js` (从 `index.tsx` 转译而来的原生 JS)，它实现了：
@@ -64,5 +60,5 @@
 2. **主题切换**: 动态修改 CSS 变量。
 3. **UI 交互**: Tab 切换、评分组件等。
 
-开发时建议在 `index.html` 中调试 UI，完成后将 `index.css` 和 `script.js` 的逻辑同步至生产环境代码中。
+> **⚠️ 部署注意**：详细的 API 接口定义、后端对接方式及环境适配（如微信环境）说明，请查阅 `PRD/API接口说明.md`。
 

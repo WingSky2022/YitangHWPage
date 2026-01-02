@@ -853,6 +853,217 @@
     <script src="./markdown-config.js"></script>
     <script src="./markdown-renderer.js"></script>
     <script src="./script.js"></script>
+
+    <!-- Toast Notification UI -->
+    <div id="toast-notification"
+        class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 transition-opacity duration-300 opacity-0 pointer-events-none z-[100]">
+        <span id="toast-icon" class="material-icons-round text-lg text-green-400">check_circle</span>
+        <span id="toast-text" class="text-sm font-medium">Notification</span>
+    </div>
+
+    <!-- API Placeholder Script -->
+    <script>
+        // API Configuration
+        const API_BASE_URL = '/api'; // Replace with actual backend URL in production
+        const MOCK_DELAY = 500; // Simulation delay in ms
+
+        // Helper for URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // --- Toast Logic ---
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast-notification');
+            const toastText = document.getElementById('toast-text');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastText.textContent = message;
+            if (isError) {
+                toastIcon.textContent = 'error';
+                toastIcon.className = 'material-icons-round text-lg text-red-500';
+            } else {
+                toastIcon.textContent = 'check_circle';
+                toastIcon.className = 'material-icons-round text-lg text-green-400';
+            }
+
+            toast.classList.remove('opacity-0');
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        // --- API Placeholder Functions ---
+
+        /**
+         * Initialize Page Data
+         * GET /api/homework/{id}
+         */
+        async function initPage() {
+            const homeworkId = getUrlParameter('id') || 'demo_id';
+            console.log(`[API] Initializing page for Homework ID: ${homeworkId}`);
+            console.log(`[API] GET ${API_BASE_URL}/homework/${homeworkId}`);
+
+            // Simulate API Call
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    console.log('[API] Page data loaded (Simulated)');
+                    // In a real app, you would populate the editor content here:
+                    // document.querySelector('#q1-editor').innerHTML = response.data.draft.q1;
+                    resolve({ status: 'ok', data: { /* ... */ } });
+                }, MOCK_DELAY);
+            });
+        }
+
+        /**
+         * Save Draft
+         * POST /api/homework/{id}/save
+         */
+        async function saveDraft() {
+            const homeworkId = getUrlParameter('id') || 'demo_id';
+            console.log(`[API] Saving draft for Homework ID: ${homeworkId}`);
+
+            // Gather Data (Example)
+            const draftData = {
+                q1: document.querySelectorAll('.ql-editor')[0].innerHTML,
+                q2: document.querySelectorAll('.ql-editor')[1].innerHTML,
+                updatedAt: new Date().toISOString()
+            };
+
+            console.log(`[API] POST ${API_BASE_URL}/homework/${homeworkId}/save`, draftData);
+
+            // Simulate API Call (Random Success/Fail for Demo)
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    // 90% Success Rate for demo
+                    const isSuccess = Math.random() > 0.1;
+
+                    if (isSuccess) {
+                        console.log('[API] Draft saved successfully (Simulated)');
+                        showToast('当前作业已存到草稿中');
+                        resolve({ status: 'ok' });
+                    } else {
+                        console.warn('[API] Save failed (Simulated)');
+                        showToast('请注意：当前作业保存失败', true);
+                        resolve({ status: 'error' });
+                    }
+                }, MOCK_DELAY);
+            });
+        }
+
+        /**
+         * Submit Homework
+         * POST /api/homework/{id}/submit
+         */
+        async function submitHomework() {
+            const homeworkId = getUrlParameter('id') || 'demo_id';
+            console.log(`[API] Submitting homework for Homework ID: ${homeworkId}`);
+
+            // Gather Data
+            const submissionData = {
+                answers: {
+                    q1: document.querySelectorAll('.ql-editor')[0].innerHTML,
+                    q2: document.querySelectorAll('.ql-editor')[1].innerHTML
+                },
+                courseRating: document.querySelector('input[name="rating"]:checked')?.value,
+                publicWillingness: document.querySelector('input[name="public_willingness"]:checked')?.value
+            };
+
+            if (!submissionData.courseRating) {
+                alert('请先完成课程打分');
+                return;
+            }
+
+            console.log(`[API] POST ${API_BASE_URL}/homework/${homeworkId}/submit`, submissionData);
+
+            // Simulate API Call
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    console.log('[API] Homework submitted successfully (Simulated)');
+                    alert('作业提交成功 (模拟)! 即将跳转...');
+                    window.location.href = 'homework_done.html';
+                    resolve({ status: 'ok' });
+                }, MOCK_DELAY);
+            });
+        }
+
+        /**
+         * Load History
+         * GET /api/homework/{id}/history
+         */
+        async function loadHistory() {
+            const homeworkId = getUrlParameter('id') || 'demo_id';
+            console.log(`[API] Loading history for Homework ID: ${homeworkId}`);
+            console.log(`[API] GET ${API_BASE_URL}/homework/${homeworkId}/history`);
+
+            // Simulate API Call
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    console.log('[API] History loaded (Simulated)');
+                    // Update UI with history data...
+                    resolve({ status: 'ok', data: [] });
+                }, MOCK_DELAY);
+            });
+        }
+
+        /**
+         * Upload Image (Called by script.js or custom handler)
+         * POST /api/upload/image
+         */
+        async function uploadImage(file) {
+            console.log(`[API] Uploading image: ${file.name}`);
+            const formData = new FormData();
+            formData.append('file', file);
+
+            console.log(`[API] POST ${API_BASE_URL}/upload/image`);
+
+            // Simulate API Call
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const mockUrl = 'https://via.placeholder.com/300';
+                    console.log(`[API] Image uploaded. URL: ${mockUrl} (Simulated)`);
+                    resolve({ status: 'ok', url: mockUrl });
+                }, MOCK_DELAY);
+            });
+        }
+
+        // --- Initialization & Event Bindings ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Initialize Page
+            initPage();
+
+            // 2. Bind Save Draft Button (in Header)
+            // Finding the save button securely (it uses title="Save Draft" or local class)
+            const saveBtn = document.querySelector('button[title="Save Draft"]');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', saveDraft);
+            }
+
+            // 3. Bind Submit Button (in Footer)
+            // It uses onclick="window.location.href..." in HTML, we should override or add listener.
+            // Best to replace the onclick attribute or let this listener handle it and preventDefault if needed.
+            // The HTML button currently has: onclick="window.location.href='homework_done.html'"
+            // We need to remove that to prevent immediate navigation.
+            const submitBtn = document.querySelector('button[onclick*="homework_done.html"]');
+            if (submitBtn) {
+                submitBtn.removeAttribute('onclick'); // Remove the static navigation
+                submitBtn.addEventListener('click', submitHomework);
+            }
+
+            // 4. Bind History Tab
+            const historyTabBtn = document.querySelector('button[data-tab="tab-history"]');
+            if (historyTabBtn) {
+                historyTabBtn.addEventListener('click', () => {
+                    // Only load if not loaded? Or every time? For now, every time is fine for demo.
+                    loadHistory();
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
