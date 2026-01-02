@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>作业完成 - Assignment Editor</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#fad200", // Yellow accent
+                        "primary-hover": "#e6c200",
+                        "background-light": "#f8f8f8",
+                        "background-dark": "#121212",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e1e1e",
+                        "text-main-light": "#1f2937",
+                        "text-main-dark": "#f3f4f6",
+                        "text-muted-light": "#6b7280",
+                        "text-muted-dark": "#9ca3af",
+                        "border-light": "#e5e7eb",
+                        "border-dark": "#333333",
+                        "alert-red": "#ef4444",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "1rem",
+                        '2xl': "1.5rem",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+                    }
+                },
+            },
+        };
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        /* Specific styles for the result page */
+        .score-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            /* For stamp positioning */
+        }
+
+        .score-stamp {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: auto;
+            opacity: 0.9;
+            transform: rotate(-15deg) translateY(-50%);
+        }
+
+        .dark .score-card {
+            background: #1e1e1e;
+            box-shadow: none;
+            border: 1px solid #333;
+        }
+
+        .score-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111;
+        }
+
+        .dark .score-number {
+            color: #f3f4f6;
+        }
+
+        .comment-box {
+            background-color: #fefae5;
+            /* Updated color */
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+
+        .dark .comment-box {
+            background-color: rgba(254, 250, 229, 0.1);
+            color: #d1d5db;
+        }
+
+        .comment-label {
+            font-weight: 700;
+            color: #111;
+            margin-right: 5px;
+        }
+
+        .dark .comment-label {
+            color: #f3f4f6;
+        }
+
+        .question-meta {
+            margin-bottom: 15px;
+        }
+
+        .answer-content {
+            background-color: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            color: #374151;
+            font-size: 15px;
+            line-height: 1.6;
+            border: 1px solid #e5e7eb;
+        }
+
+        .dark .answer-content {
+            background-color: #27272a;
+            color: #d1d5db;
+            border-color: #333;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-sans antialiased pb-24 transition-colors duration-300">
+    <!-- Navbar -->
+    <nav
+        class="sticky top-0 z-50 backdrop-blur-md bg-background-light/80 dark:bg-background-dark/80 border-b border-border-light dark:border-border-dark mb-8">
+        <div class="max-w-4xl mx-auto px-4 sm:px-16 lg:px-[4.5rem]">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <span class="material-icons-round text-primary text-2xl">school</span>
+                    <h1 class="text-lg font-bold tracking-tight truncate">《业务公式实操1：建立公式篇》</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button
+                        class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors text-gray-500 dark:text-gray-400"
+                        onclick="document.documentElement.classList.toggle('dark')" title="Toggle Dark Mode">
+                        <span class="material-symbols-outlined text-[20px]">dark_mode</span>
+                    </button>
+                    <!-- User Avatar Placeholder -->
+                    <div
+                        class="w-8 h-8 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-bold text-gray-500 dark:text-gray-400">
+                        Me
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <!-- Module 1: Score Card -->
+        <div
+            class="bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm p-6 text-center mb-6 relative overflow-hidden">
+            <div class="flex flex-col items-center justify-center gap-2 mb-4">
+                <h2 class="text-xl font-bold">《业务公式实操1：建立公式篇》</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">提交时间：2026-01-02 12:00</p>
+            </div>
+
+            <div class="inline-block px-8 py-4 bg-primary/10 rounded-2xl border border-primary/20">
+                <span class="text-gray-600 dark:text-gray-300 mr-2">已获得学分</span>
+                <span class="text-3xl font-black text-gray-900 dark:text-white">6</span>
+                <span class="text-xl font-bold text-gray-900 dark:text-white ml-1">分</span>
+            </div>
+
+            <img src="https://cdn.yitang.top/yitang-fe-static/assets/img/homework/stamp.png" alt="Excellent"
+                class="absolute right-6 top-1/2 transform -translate-y-1/2 w-24 sm:w-32 opacity-90 -rotate-12 pointer-events-none hidden sm:block">
+        </div>
+
+        <!-- Module 2: Homework Content -->
+        <div
+            class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden p-6 sm:p-10 mb-6">
+
+            <!-- Question 1 -->
+            <div class="mb-10">
+                <div class="question-meta">
+                    <h2 class="fs-h2 mb-4">1、第一个作业：请根据自己的业务，写出三个公式。</h2>
+                    <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 fs-body mb-4">
+                        <p>这节课讲了三个公式，分别是「销售额=流量x转化率x客单价」、「用户数=流量x转化率」和「收入=用户数x客单价」。请根据自己的业务场景，尝试写出三个核心公式，并简单说明每个变量的定义。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="answer-content">
+                    <p><strong>我的回答：</strong></p>
+                    <p>1. 营收 = 潜在客户数 × 转化率 × LTV</p>
+                    <p>2. 活跃用户 = 新增用户 + 留存用户 - 流失用户</p>
+                    <p>3. 内容ROI = (引流价值 + 品牌价值) / 内容制作成本</p>
+                </div>
+            </div>
+
+            <div class="h-px bg-border-light dark:border-border-dark my-10"></div>
+
+            <!-- Question 2 -->
+            <div class="mb-10">
+                <div class="question-meta">
+                    <h2 class="fs-h2 mb-4">2、第二个作业：案例推演题</h2>
+                    <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 fs-body mb-4">
+                        <p class="mb-2">找一个你想要提升的业务场景，尝试用课上讲的工作流做两个事情：</p>
+                        <ul class="list-decimal list-outside space-y-1 pl-6">
+                            <li>你可以尝试梳理你的业务现状，初步构建你的业务公式，同时说说你想要达到的目标，初步判断你可能提升的最大机会点。</li>
+                            <li>如果可以，在业务公式的基础上，看看自己能激发出发多少假设。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="answer-content">
+                    <p><strong>我的回答：</strong></p>
+                    <p>针对“社区团购”业务场景：</p>
+                    <p>机会点：通过优化“团长”激励机制提高转化率。</p>
+                    <p>假设1：如果提高团长佣金比例5%，GMV能提升10%。</p>
+                    <p>假设2：如果不定期举办团长PK赛，活跃团长数能提升20%。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Module 3: Teacher's Comment -->
+        <div
+            class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden p-6 sm:p-8 mb-6">
+            <div class="comment-box !mt-0">
+                <span class="comment-label">班主任点评：</span>
+                <span>总结得非常到位！尤其是第三个公式关于ROI的拆解，非常有见地。案例推演的方向也找得很准，关于假设1，建议可以先小范围试点，观察佣金提升带来的实际边际收益，防止成本过高。</span>
+            </div>
+        </div>
+
+        <!-- Module 4: Course Satisfaction Card -->
+        <div
+            class="bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark overflow-hidden p-6 sm:p-10 text-center mb-6">
+
+            <div class="flex justify-center mb-10">
+                <div class="relative group">
+                    <div class="absolute inset-y-1/2 -left-12 w-8 h-px bg-primary/40"></div>
+                    <div class="absolute inset-y-1/2 top-1 -left-12 w-6 h-px bg-primary/20"></div>
+                    <h2
+                        class="text-xl font-bold px-12 py-2 bg-gradient-to-r from-[#ffe587] to-[#fad200] text-gray-900 rounded-lg shadow-sm transform -skew-x-12 relative z-10">
+                        <span class="block transform skew-x-12 tracking-widest">课程满意度</span>
+                    </h2>
+                    <div class="absolute inset-y-1/2 -right-12 w-8 h-px bg-primary/40"></div>
+                    <div class="absolute inset-y-1/2 top-1 -right-12 w-6 h-px bg-primary/20"></div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-gray-600 dark:text-gray-300 flex flex-col items-center gap-2">
+                    <span class="text-sm">课程打分</span>
+                    <span class="text-primary text-4xl font-bold flex items-center gap-1">
+                        5
+                        <span class="text-base font-normal text-gray-400">分</span>
+                    </span>
+                </p>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-border-light dark:border-border-dark">
+                <p class="text-sm text-gray-600 dark:text-gray-300 flex items-center justify-center gap-2">
+                    <span>公开意愿：</span>
+                    <span class="font-bold">愿意</span>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div
+        class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-card-dark/95 backdrop-blur-md border-t border-border-light dark:border-border-dark px-4 py-4 z-20">
+        <div class="max-w-4xl mx-auto flex items-center gap-4 justify-center">
+            <button
+                class="flex-1 max-w-[200px] bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-800 dark:text-gray-200 font-bold py-2.5 px-6 rounded-full transition-all duration-200"
+                onclick="window.location.href='index.html'">
+                再写一份
+            </button>
+            <button
+                class="flex-1 max-w-[200px] bg-primary hover:bg-primary-hover text-gray-900 font-bold py-2.5 px-6 rounded-full shadow-lg shadow-yellow-500/20 transition-all duration-200 flex justify-center items-center gap-2">
+                <span class="material-icons-round text-lg">share</span>
+                分享
+            </button>
+        </div>
+    </div>
+
+</body>
+
+</html>

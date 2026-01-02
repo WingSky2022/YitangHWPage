@@ -15,29 +15,29 @@
 
 ### 1.1 JavaScript库和Vue应用模块
 
-| 资源地址 | 作用 | 状态 |
-|---------|------|------|
-| `https://cdn.yitang.top/yitang/prod/chunk-vue-b9819803cb-20251105154341.js` | Vue.js核心库 | 必需 |
-| `https://cdn.yitang.top/yitang/prod/chunk-libs-c58599daee-20251105154341.js` | 工具库（lodash等） | 必需 |
-| `https://cdn.yitang.top/yitang/prod/chunk-lodash-ae272d1656-20251105154341.js` | Lodash工具函数库 | 必需 |
-| `https://cdn.yitang.top/yitang/prod/main-6e7f5214e3.js` | **Vue应用主入口（包含所有API调用）** | **必需 - 包含API逻辑** |
-| `https://cdn.yitang.top/yitang/prod/vendors~homework-edit-*.js` | 作业编辑模块 | 必需 |
-| `https://cdn.yitang.top/yitang/prod/homework-edit-*.js` | 作业编辑功能 | 必需 |
-| `https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js` | Markdown解析库（本次新增） | 可选 |
+| 资源地址                                                                       | 作用                                 | 状态                   |
+| ------------------------------------------------------------------------------ | ------------------------------------ | ---------------------- |
+| `https://cdn.yitang.top/yitang/prod/chunk-vue-b9819803cb-20251105154341.js`    | Vue.js核心库                         | 必需                   |
+| `https://cdn.yitang.top/yitang/prod/chunk-libs-c58599daee-20251105154341.js`   | 工具库（lodash等）                   | 必需                   |
+| `https://cdn.yitang.top/yitang/prod/chunk-lodash-ae272d1656-20251105154341.js` | Lodash工具函数库                     | 必需                   |
+| `https://cdn.yitang.top/yitang/prod/main-6e7f5214e3.js`                        | **Vue应用主入口（包含所有API调用）** | **必需 - 包含API逻辑** |
+| `https://cdn.yitang.top/yitang/prod/vendors~homework-edit-*.js`                | 作业编辑模块                         | 必需                   |
+| `https://cdn.yitang.top/yitang/prod/homework-edit-*.js`                        | 作业编辑功能                         | 必需                   |
+| `https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js`                     | Markdown解析库（本次新增）           | 可选                   |
 
 ### 1.2 样式和字体资源
 
-| 资源地址 | 作用 | 状态 |
-|---------|------|------|
-| `https://cdn.yitang.top/iconfont/20220717/iconfont.css` | 图标字体 | 必需 |
-| `https://cdn.yitang.top/yitang-fe-static/assets/font/*.ttf` | 自定义字体文件 | 可选 |
-| `https://cdn.yitang.top/yitang-fe-static/assets/img/homework/bg_title.png` | 标题背景图 | 可选 |
+| 资源地址                                                                   | 作用           | 状态 |
+| -------------------------------------------------------------------------- | -------------- | ---- |
+| `https://cdn.yitang.top/iconfont/20220717/iconfont.css`                    | 图标字体       | 必需 |
+| `https://cdn.yitang.top/yitang-fe-static/assets/font/*.ttf`                | 自定义字体文件 | 可选 |
+| `https://cdn.yitang.top/yitang-fe-static/assets/img/homework/bg_title.png` | 标题背景图     | 可选 |
 
 ### 1.3 第三方分析工具
 
-| 资源地址 | 作用 | 状态 |
-|---------|------|------|
-| `https://hm.baidu.com/hm.js?b86d6f2795c5a7f47ee0c942cd4d1488` | 百度统计 | 可选 |
+| 资源地址                                                                               | 作用             | 状态 |
+| -------------------------------------------------------------------------------------- | ---------------- | ---- |
+| `https://hm.baidu.com/hm.js?b86d6f2795c5a7f47ee0c942cd4d1488`                          | 百度统计         | 可选 |
 | `https://sf1-scmcdn-tos.pstatp.com/goofy/log-sdk/collect/collect-autotrack-rangers.js` | 字节跳动数据统计 | 可选 |
 
 ---
@@ -52,25 +52,25 @@
 
 #### 作业相关接口
 
-| 接口路径（推断） | 方法 | 作用 | 推测位置 |
-|----------------|------|------|---------|
-| `/api/homework/get` 或 `/homework/:id` | GET | 获取作业详情 | Vue路由/API调用 |
-| `/api/homework/save` 或 `/homework/:id/save` | POST | 保存作业（暂存） | 暂存按钮 |
-| `/api/homework/submit` 或 `/homework/:id/submit` | POST | 提交作业 | 提交按钮 |
-| `/api/homework/update` 或 `/homework/:id/update` | PUT | 更新作业内容 | 自动保存功能 |
+| 接口路径（推断）                                 | 方法 | 作用             | 推测位置        |
+| ------------------------------------------------ | ---- | ---------------- | --------------- |
+| `/api/homework/get` 或 `/homework/:id`           | GET  | 获取作业详情     | Vue路由/API调用 |
+| `/api/homework/save` 或 `/homework/:id/save`     | POST | 保存作业（暂存） | 暂存按钮        |
+| `/api/homework/submit` 或 `/homework/:id/submit` | POST | 提交作业         | 提交按钮        |
+| `/api/homework/update` 或 `/homework/:id/update` | PUT  | 更新作业内容     | 自动保存功能    |
 
 #### 用户相关接口
 
-| 接口路径（推断） | 方法 | 作用 | 推测位置 |
-|----------------|------|------|---------|
-| `/api/user/info` | GET | 获取用户信息 | 页面初始化 |
-| `/api/user/login` | POST | 用户登录验证 | 访问控制 |
+| 接口路径（推断）  | 方法 | 作用         | 推测位置   |
+| ----------------- | ---- | ------------ | ---------- |
+| `/api/user/info`  | GET  | 获取用户信息 | 页面初始化 |
+| `/api/user/login` | POST | 用户登录验证 | 访问控制   |
 
 #### 课程相关接口
 
-| 接口路径（推断） | 方法 | 作用 | 推测位置 |
-|----------------|------|------|---------|
-| `/api/course/:id` | GET | 获取课程信息 | 页面头部 |
+| 接口路径（推断）  | 方法 | 作用         | 推测位置 |
+| ----------------- | ---- | ------------ | -------- |
+| `/api/course/:id` | GET  | 获取课程信息 | 页面头部 |
 
 ### 2.2 如何查看实际API接口
 
