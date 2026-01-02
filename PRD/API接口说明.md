@@ -76,21 +76,36 @@
 ```
 
 ### 2.3 获取作业结果 (`GET /api/homework/{id}/result`)
-**Response Data:**
+**Response Data (Matches `homework_done.html` implementation):**
 ```json
 {
-  "title": "《业务公式实操1：建立公式篇》",
-  "submissionTime": "2026-01-02 12:00",
-  "score": 6,
-  "isExcellent": true, // 是否显示"优秀作业"印章
-  "teacherComment": "总结得非常到位！...",
-  "submittedContent": {
-    "q1": "...",
-    "q2": "..."
+  "header": {
+    "title": "《业务公式实操1：建立公式篇》",
+    "date": "2026-01-02",
+    "score": "6",
+    "isExcellent": true // 控制"优秀作业"印章显示的布尔值
+  },
+  "userInfo": {
+    "name": "Me",
+    "avatarText": "Me"
+  },
+  "homeworkList": [
+    {
+      "order": 1,
+      "title": "第一个作业：请根据自己的业务，写出三个公式。",
+      "content": "<div>HTML Content...</div>" 
+    },
+    {
+      "order": 2,
+      "title": "第二个作业：案例推演题",
+      "content": "<div>HTML Content...</div>"
+    }
+  ],
+  "teacherComment": {
+    "text": "总结得非常到位！尤其是第三个公式关于ROI的拆解，非常有见地..."
   },
   "satisfaction": {
-    "score": 5,
-    "publicWillingness": "愿意"
+    "courseScore": 10
   }
 }
 ```
@@ -108,33 +123,31 @@ const API_BASE_URL = "https://api.yitang.top"; // 需替换为实际后端地址
 ```
 
 ### 2. 页面初始化参数注入
-页面需要知道当前操作的是哪个作业。建议通过 URL 路径参数传递 ID。
+建议通过 URL 路径参数传递 ID。
 
 *   **index.html**: 部署路由应匹配 `/homework/:id/edit`。
     *   JS 逻辑需解析 URL 中的 `:id`，并调用 `GET /api/homework/:id` 初始化编辑器内容。
 *   **homework_done.html**: 部署路由应匹配 `/homework/:id` 或 `/homework/:id/result`。
-    *   JS 逻辑需解析 URL 中的 `:id`，并调用 `GET /api/homework/:id/result` 渲染页面。
+    *   **关键对接点**: 页面中已封装 `renderPage(data)` 函数。
+    *   在页面加载时，调用接口获取数据，然后执行 `renderPage(response.data)` 即可自动填充所有内容（包括动态控制“优秀作业”印章的显示）。
+    *   **开发模式**: 默认使用 `mockData` 常量进行演示。上线前请删除或注释掉 `mockData` 的初始化调用。
 
 ### 3. CSS 与 静态资源
 *   确保 `index.css` 已正确部署并被两个 HTML 文件引用。
-*   确保 Tailwind CSS 脚本及 Google Fonts 可正常访问（建议生产环境本地化这些资源以提高加载速度）。
+*   确保 `share-generator.js`、`html2canvas`、`qrcodejs` 资源可正常加载。
+*   **印章资源**: 优秀作业印章图片路径为 `https://cdn.yitang.top/yitang-fe-static/assets/img/homework/stamp.png` (已在 HTML 中硬编码，可根据需要替换)。
 
 ### 4. 认证处理
 *   所有 API 请求 Header 中需携带用户认证 Token（如 `Authorization: Bearer <token>`）。
-*   若 Token 失效，前端需重定向至登录页面（需确认登录页 URL）。
 
 ### 5. 交互行为绑定
 需要修改 HTML 中的静态 `onclick` 事件为实际的 JS 逻辑：
 
 *   **index.html**:
-    *   **历史作业 Tab**: 点击 `{点击这里}` 需绑定 Clipboard API 复制当前 URL。
-    *   **保存按钮**: 移除 `alert`，绑定 `POST /save` 接口，成功后更新 "内容已于 XX:XX 自动保存" 提示。
-    *   **提交按钮**: 移除 `href` 跳转，绑定 `POST /submit` 接口。成功后使用 `window.location.href` 跳转至 `homework_done.html`。
+    *   **保存/提交**: 绑定对应 POST 接口。
 *   **homework_done.html**:
-    *   **再写一份按钮**: 绑定跳转回 `index.html` 的逻辑。
+    *   **分享功能**: 已封装在 `generateShareImage()` 中，无需额外对接，只要页面内容渲染正确，分享图片即会自动生成正确内容。
 
 ### 6. 图片上传对接
-*   在 `index.html` 中，监听 `.image-upload-input` 的 `change` 事件。
-*   获取文件对象，构造 `FormData`，调用 `POST /api/upload/image`。
-*   获取返回的 URL，调用 Quill/Editor 的 `insertEmbed` 方法将图片插入编辑器光标处。
+*   在 `index.html` 中，监听 `.image-upload-input` 的 `change` 事件对接上传接口。
 
