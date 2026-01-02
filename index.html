@@ -242,6 +242,15 @@
             --fs-color-body-dark: #f3f4f6;
         }
 
+        @media (max-width: 640px) {
+            :root {
+                --fs-font-h1-size: 22px;
+                --fs-font-h2-size: 18px;
+                --fs-font-h3-size: 16px;
+                --fs-font-body-size: 15px;
+            }
+        }
+
         /* Base styles applied to editor and marked elements */
         .ql-editor,
         .fs-typography {
@@ -467,6 +476,19 @@
             right: -6px;
             cursor: se-resize;
         }
+
+        @media (max-width: 640px) {
+            .star-rating-container {
+                transform: scale(0.85);
+                /* Slightly smaller stars on mobile */
+                transform-origin: center;
+            }
+
+            .slider-label {
+                font-size: 0.85rem;
+                /* Smaller text for slider options */
+            }
+        }
     </style>
 </head>
 
@@ -474,7 +496,7 @@
     class="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark min-h-screen font-sans antialiased pb-20 transition-colors duration-300">
     <nav
         class="sticky top-0 z-50 backdrop-blur-md bg-background-light/80 dark:bg-background-dark/80 border-b border-border-light dark:border-border-dark mb-8">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto px-4 sm:px-16 lg:px-[4.5rem]">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center gap-2">
                     <span class="material-icons-round text-primary text-2xl">school</span>
@@ -496,19 +518,86 @@
     </nav>
     <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <div
-            class="bg-white dark:bg-card-dark rounded-2xl p-6 border border-border-light dark:border-border-dark shadow-sm flex flex-col sm:flex-row gap-5 items-start">
-            <div class="shrink-0">
-                <div
-                    class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
-                    <span class="material-icons-round text-2xl">check_circle_outline</span>
-                </div>
+            class="bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark shadow-sm overflow-hidden">
+            <!-- Tabs Header -->
+            <div class="flex border-b border-border-light dark:border-border-dark">
+                <button
+                    class="tab-btn flex-1 py-3 text-sm font-bold text-center transition-colors relative text-gray-900 dark:text-gray-100 border-b-2 border-primary"
+                    data-tab="tab-rules">
+                    作业规则
+                </button>
+                <button
+                    class="tab-btn flex-1 py-3 text-sm font-medium text-center transition-colors relative text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent"
+                    data-tab="tab-history">
+                    历史作业
+                </button>
+                <button
+                    class="tab-btn flex-1 py-3 text-sm font-medium text-center transition-colors relative text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent"
+                    data-tab="tab-tips">
+                    提示
+                </button>
             </div>
-            <div class="space-y-2">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white">会话已恢复</h3>
-                <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                    我们已恢复您在 <span class="font-bold text-gray-800 dark:text-gray-200">2025-12-19 19:37:42</span>
-                    的进度。别担心，其他标签页已被锁定以防止冲突。您可以安全地在此继续。
-                </p>
+
+            <!-- Tab Contents -->
+            <div class="p-6">
+                <!-- Rules -->
+                <div id="tab-rules" class="tab-content transition-opacity duration-200">
+                    <div class="space-y-4 text-sm text-gray-600 dark:text-gray-300">
+                        <p>完成作业，班主任将根据作业质量打(0-6)学分。</p>
+                        <p>你的每一份作业都会记录在"一堂"后台，作业和学分会是未来优秀学员考评的参考，也是线下VIP活动邀请的基础，希望大家认真对待每一次学习机会。</p>
+                        <div
+                            class="bg-gray-50 dark:bg-zinc-800/50 p-3 rounded-lg border border-border-light dark:border-border-dark/50">
+                            <p class="font-medium mb-1">推荐在电脑端完成作业，书写排版更方便~</p>
+                            <p>
+                                <button onclick="copyCurrentUrl()"
+                                    class="font-bold text-[#d41539] underline hover:opacity-80 transition-opacity"
+                                    title="点击复制链接">
+                                    点击这里
+                                </button>
+                                复制页面地址，将复制内容粘贴到电脑端浏览器中打开
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">如提示扫码登录，使用微信扫码即可</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div id="tab-history" class="tab-content hidden">
+                    <div class="flex items-start gap-3">
+                        <div class="shrink-0 mt-0.5">
+                            <span class="material-icons-round text-primary text-xl">history</span>
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-300">
+                            <p class="mb-2">你已经在2025-12-15 00:08写了一份作业了，获得了5个学分，
+                                <a href="javascript:void(0)" onclick="alert('这是历史作业的查看入口占位符')"
+                                    class="inline-flex items-center px-2 py-0.5 rounded bg-primary/10 text-primary-hover font-medium text-xs hover:bg-primary/20 transition-colors">
+                                    点我查看
+                                    <span class="material-icons-round text-[14px] ml-0.5">open_in_new</span>
+                                </a>
+                            </p>
+                            <p>要不要再写一份更棒的，刷新提高一下学分呢？</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div id="tab-tips" class="tab-content hidden">
+                    <div class="flex gap-4 items-start">
+                        <div class="shrink-0">
+                            <div
+                                class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                                <span class="material-icons-round text-xl">check_circle_outline</span>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white">会话已恢复</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                                您于 <span class="font-bold text-gray-800 dark:text-gray-200">【2026-01-02
+                                    11:20:24】</span>继续编辑您的作业，为了避免作业内容丢失，这份作业的其他窗口已锁定，请您安心在这里继续写完。
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -526,7 +615,7 @@
             </div>
 
             <!-- Question 1 -->
-            <div class="px-6 sm:px-10 pb-12">
+            <div class="px-4 sm:px-10 pb-12">
                 <div class="mb-4">
                     <h2 class="fs-h2 mb-4">1、第一个作业：请根据自己的业务，写出三个公式。</h2>
 
@@ -608,7 +697,7 @@
             <div class="h-px bg-border-light dark:border-border-dark mx-10 mb-10"></div>
 
             <!-- Question 2 -->
-            <div class="px-6 sm:px-10 pb-12">
+            <div class="px-4 sm:px-10 pb-12">
                 <div class="mb-4">
                     <h2 class="fs-h2 mb-4">2、第二个作业：案例推演题</h2>
                     <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 fs-body mb-6">
@@ -678,7 +767,7 @@
             <div class="h-px bg-border-light dark:border-border-dark mx-10 mb-10"></div>
 
             <!-- Feedback -->
-            <div class="px-6 sm:px-10 pb-12">
+            <div class="px-4 sm:px-10 pb-12">
                 <div class="flex justify-center mb-10">
                     <div class="relative group">
                         <div class="absolute inset-y-1/2 -left-12 w-8 h-px bg-primary/40"></div>
@@ -743,7 +832,7 @@
 
             <!-- Footer -->
             <div
-                class="sticky bottom-0 bg-white/90 dark:bg-card-dark/95 backdrop-blur-md border-t border-border-light dark:border-border-dark px-6 py-4 flex flex-col items-center gap-3 z-20">
+                class="sticky bottom-0 bg-white/90 dark:bg-card-dark/95 backdrop-blur-md border-t border-border-light dark:border-border-dark px-4 sm:px-6 py-4 flex flex-col items-center gap-3 z-20">
                 <div class="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
                     <span class="material-icons-round text-sm">cloud_done</span>
                     内容已于 19:38 分自动保存

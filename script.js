@@ -360,6 +360,7 @@ function toggleFullscreen(container, btn) {
     }
 }
 
+
 // Highlight Function for Toolbar Button
 function execHighlight() {
     const selection = window.getSelection();
@@ -397,3 +398,81 @@ function execHighlight() {
         document.dispatchEvent(evt);
     }, 0);
 }
+
+// --- Tabbed Interface Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Delegate click for tab buttons
+    document.addEventListener('click', (e) => {
+        const tabBtn = e.target.closest('.tab-btn');
+        if (!tabBtn) return;
+
+        e.preventDefault(); // Prevent default if any
+
+        const targetId = tabBtn.getAttribute('data-tab');
+        if (!targetId) return;
+
+        // Find the Tabs Container (Parent of the buttons wrapper)
+        // Structure: div.rounded-xl > div.flex (Header) > button.tab-btn
+        const tabsHeader = tabBtn.parentElement;
+        const tabsContainer = tabsHeader.parentElement;
+
+        // 1. Update Buttons
+        tabsHeader.querySelectorAll('.tab-btn').forEach(btn => {
+            const isSelected = btn === tabBtn;
+            if (isSelected) {
+                // Active State
+                btn.classList.add('text-gray-900', 'dark:text-gray-100', 'border-primary', 'font-bold');
+                btn.classList.remove('text-gray-500', 'dark:text-gray-400', 'border-transparent', 'font-medium');
+            } else {
+                // Inactive State
+                btn.classList.remove('text-gray-900', 'dark:text-gray-100', 'border-primary', 'font-bold');
+                btn.classList.add('text-gray-500', 'dark:text-gray-400', 'border-transparent', 'font-medium');
+            }
+        });
+
+        // 2. Update Content
+        const contentContainer = tabsContainer.querySelector('.p-6'); // The content wrapper
+        if (contentContainer) {
+            contentContainer.querySelectorAll('.tab-content').forEach(content => {
+                if (content.id === targetId) {
+                    content.classList.remove('hidden');
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+        }
+    });
+});
+
+// Copy URL Function
+window.copyCurrentUrl = function () {
+    const url = window.location.href;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            alert('复制成功！\n页面地址已复制到剪贴板。');
+        }).catch(err => {
+            console.error('Clipboard API failed', err);
+            fallbackCopy(url);
+        });
+    } else {
+        fallbackCopy(url);
+    }
+
+    function fallbackCopy(text) {
+        // Fallback for older browsers or non-secure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            const successful = document.execCommand('copy');
+            const msg = successful ? '复制成功！' : '复制失败';
+            alert(msg + (successful ? '\n页面地址已复制到剪贴板。' : ''));
+        } catch (err) {
+            prompt("无法自动复制，请手动复制以下链接：", text);
+        }
+        document.body.removeChild(textArea);
+    }
+};
