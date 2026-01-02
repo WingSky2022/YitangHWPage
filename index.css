@@ -241,3 +241,29 @@ body {
 }
 .btn-storage { background: #f0f0f0; color: #333; margin-right: 10px; }
 .btn-submit { background: var(--primary-color); color: #000; }
+
+/* Image Resizer Styles */
+.resizer-overlay {
+    position: absolute;
+    pointer-events: none;
+    border: 2px solid #007bff; /* Blue border */
+    z-index: 1000;
+    display: none;
+    box-sizing: border-box;
+}
+
+.resizer-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #000; /* Black control points */
+    border: 1px solid #fff;
+    pointer-events: auto;
+    cursor: se-resize;
+    z-index: 1001;
+}
+
+.handle-nw { top: -6px; left: -6px; cursor: nw-resize; }
+.handle-ne { top: -6px; right: -6px; cursor: ne-resize; }
+.handle-sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+.handle-se { bottom: -6px; right: -6px; cursor: se-resize; }

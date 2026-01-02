@@ -355,15 +355,20 @@
         /* Fullscreen Mode */
         .fullscreen-mode {
             position: fixed;
-            inset: 0;
-            z-index: 9999;
+            top: 64px;
+            /* Header height */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 40;
+            /* Below header (z-50) */
             background-color: white;
             padding: 2rem;
             overflow-y: auto;
             border-radius: 0;
             margin: 0 !important;
             max-width: none !important;
-            height: 100vh;
+            height: auto;
         }
 
         .dark .fullscreen-mode {
@@ -371,7 +376,7 @@
         }
 
         .fullscreen-mode .editor-content {
-            min-height: calc(100vh - 100px);
+            min-height: calc(100vh - 150px);
             max-width: 800px;
             margin: 0 auto;
         }
@@ -415,6 +420,53 @@
         .fs-typography i {
             font-style: italic;
         }
+
+        /* Image Resizer Styles */
+        .resizer-overlay {
+            position: absolute;
+            pointer-events: none;
+            border: 2px solid #007bff;
+            /* Blue border */
+            z-index: 1000;
+            display: none;
+            box-sizing: border-box;
+        }
+
+        .resizer-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #000;
+            /* Black control points */
+            border: 1px solid #fff;
+            pointer-events: auto;
+            cursor: se-resize;
+            z-index: 1001;
+        }
+
+        .handle-nw {
+            top: -6px;
+            left: -6px;
+            cursor: nw-resize;
+        }
+
+        .handle-ne {
+            top: -6px;
+            right: -6px;
+            cursor: ne-resize;
+        }
+
+        .handle-sw {
+            bottom: -6px;
+            left: -6px;
+            cursor: sw-resize;
+        }
+
+        .handle-se {
+            bottom: -6px;
+            right: -6px;
+            cursor: se-resize;
+        }
     </style>
 </head>
 
@@ -434,8 +486,9 @@
                         onclick="document.documentElement.classList.toggle('dark')" title="Toggle Dark Mode">
                         <span class="material-symbols-outlined text-[20px]">dark_mode</span>
                     </button>
-                    <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors">
-                        <span class="material-icons-round text-gray-500 dark:text-gray-400">more_horiz</span>
+                    <button class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors"
+                        title="Save Draft">
+                        <span class="material-icons-round text-gray-500 dark:text-gray-400">save</span>
                     </button>
                 </div>
             </div>
@@ -672,10 +725,10 @@
                     <h2 class="fs-h2 mb-4">2、你是否愿意公开自己的作业？</h2>
                     <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">是否愿意公开作业内容，在课中供其他学员参考学习？</p>
                     <div class="slider-container relative mt-8">
-                        <input class="hidden toggle-radio-input" id="option1" name="public_willingness" type="radio"
-                            value="yes" />
-                        <input checked="" class="hidden toggle-radio-input" id="option2" name="public_willingness"
-                            type="radio" value="confirm" />
+                        <input checked="" class="hidden toggle-radio-input" id="option1" name="public_willingness"
+                            type="radio" value="yes" />
+                        <input class="hidden toggle-radio-input" id="option2" name="public_willingness" type="radio"
+                            value="confirm" />
                         <input class="hidden toggle-radio-input" id="option3" name="public_willingness" type="radio"
                             value="no" />
                         <div class="slider-bg"></div>
@@ -696,12 +749,7 @@
                     内容已于 19:38 分自动保存
                 </div>
                 <div class="flex w-full max-w-md gap-4">
-                    <button
-                        class="flex-1 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 font-medium py-2.5 px-6 rounded-full transition-colors duration-200 flex justify-center items-center gap-2"
-                        type="button">
-                        <span class="material-icons-round text-lg">save</span>
-                        暂存
-                    </button>
+
                     <button
                         class="flex-1 bg-primary hover:bg-primary-hover text-gray-900 font-bold py-2.5 px-6 rounded-full shadow-lg shadow-yellow-500/20 transition-all duration-200 transform hover:-translate-y-0.5 flex justify-center items-center gap-2"
                         type="submit">
