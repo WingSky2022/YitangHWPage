@@ -1,5 +1,3 @@
-
-
 # 作业系统优化版配置指南
 
 本系统已实现 **Notion 风格 UI**、**实时 Markdown 键入转换** 及 **深色模式**。
@@ -7,6 +5,7 @@
 ## 1. 更新概要
 > 作业填写页面：@index.html （双击文件查看）
 > 作业完成展示页面：@homework_done.html （双击文件查看）
+> 效果展示：https://yitanghwshow.lucasicloud.top/
 
 1. 界面展示优化；
 2. 右上角新增白天/黑夜模式按钮；
